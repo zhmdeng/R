@@ -1,0 +1,129 @@
+
+
+
+
+setwd("/Users/mac/Desktop/PowerBI/sci科研绘图/【184】SCI科研绘图--网络图+微生物丰度与基因间的相关性+正负相关/")
+
+
+rm(list = ls())   # 清空当前 R 环境中的所有对象
+# setwd('')  # 设置工作目录
+
+# ==================== 加载包 ====================
+library(igraph)   # 加载 igraph 包，用于网络分析和可视化
+library(Hmisc)    # 加载 Hmisc 包，提供统计工具
+library(psych)    # 加载 psych 包，提供 corr.test() 相关性分析
+library(dplyr)    # 加载 dplyr 包，用于数据处理
+library(tidyr)    # 加载 tidyr 包，用于数据变形（gather）
+
+# ==================== 读取数据 ====================
+mic <- read.table("Genus.txt", sep = "\t", header = T,     # 读取微生物丰度表
+                  check.names = F, row.names = 1)          # 不修改列名，第一列作为行名
+gene <- read.table("gene.txt", sep = "\t", header = T,     # 读取基因表达表
+                   check.names = F, row.names = 1)         # 同上
+group <- read.table("group.txt", sep = "\t", header = T,   # 读取分组信息（Mic/Gene）
+                    check.names = F)                       # 不修改列名
+
+# ==================== 合并数据 ====================
+mic <- as.data.frame(t(mic))    # 转置微生物表：行=样本，列=微生物
+mic$sample <- rownames(mic)      # 把行名（样本名）添加为 sample 列
+gene$sample <- rownames(gene)    # 同样给基因表添加 sample 列
+df <- merge(mic, gene, by = "sample")   # 按 sample 合并两个数据框
+rownames(df) <- df$sample        # 把 sample 列设为行名
+df <- df[-1]                     # 删除第 1 列（即 sample 列）
+head(df)                         # 查看前几行
+
+# ==================== 计算相关性 ====================
+data <- as.matrix(df)            # 把数据框转为矩阵
+cor <- corr.test(data,           # 计算相关性
+                 method = "spearman",   # 使用 Spearman 秩相关
+                 adjust = "BH")         # p 值用 Benjamini-Hochberg 法校正
+
+# 提取微生物与基因之间的相关性部分
+r.cor <- data.frame(cor$r)[1:11, 12:23]   # R 值：前 11 行（微生物），第 12-23 列（基因）
+p.cor <- data.frame(cor$p)[1:11, 12:23]   # p 值：同上
+
+# 保存
+write.csv(r.cor, file = 'cor_r.csv')      # 保存 R 值到 CSV
+write.csv(p.cor, file = 'cor_p.csv')      # 保存 p 值到 CSV
+
+# ==================== 筛选显著相关 ====================
+r.cor[p.cor > 0.05] <- 0   # 把 p > 0.05 的 R 值置为 0（不显著）
+
+# ==================== 转换为长格式 ====================
+r.cor$from <- rownames(r.cor)   # R 值矩阵的行名作为 from 列
+p.cor$from <- rownames(p.cor)   # p 值矩阵的行名作为 from 列
+
+p_value <- p.cor %>%
+  gather(key = "to", value = "p", -from) %>%   # 宽转长：p 值，from 保持不变
+  data.frame()                                  # 转为数据框
+
+cor.data <- r.cor %>%
+  gather(key = "to", value = "r", -from) %>%   # 宽转长：R 值
+  data.frame() %>%
+  left_join(p_value, by = c("from", "to")) %>% # 按 from 和 to 合并 R 和 p
+  mutate(
+    linecolor = ifelse(r > 0, "positive", "negative"),   # 正/负相关标签
+    linesize  = abs(r)                                    # 边宽 = |r|
+  )
+
+head(cor.data)   # 查看前几行
+
+# ==================== 设置节点属性 ====================
+vertices <- c(as.character(cor.data$from), as.character(cor.data$to)) %>%
+  as_tibble() %>%                  # 转为 tibble
+  group_by(value) %>%              # 按节点名分组
+  summarise()                      # 去重，得到唯一节点名
+colnames(vertices) <- "name"       # 列名改为 name
+
+vertices <- vertices %>%
+  left_join(group, by = "name")    # 关联分组信息（Mic/Gene）
+
+vertices$group <- factor(vertices$group, levels = c("Mic", "Gene"))   # 固定 group 顺序
+vertices <- vertices %>%
+  arrange(group)                   # 按 group 排序
+
+# ==================== 构建图 ====================
+graph <- graph_from_data_frame(cor.data,         # 边数据：from、to、r、p 等
+                               vertices = vertices,  # 节点数据：name、group
+                               directed = FALSE)     # 无向图
+
+# ==================== 设置边和顶点属性 ====================
+E(graph)$weight <- abs(E(graph)$r)   # 边权重 = |r|（相关性强度）
+V(graph)$label  <- V(graph)$name     # 节点标签 = 节点名
+
+# ==================== 修复 GraphML 写入错误 ====================
+V(graph)$group <- as.character(V(graph)$group)   # group 转为字符型
+
+for (attr_name in vertex_attr_names(graph)) {     # 遍历所有顶点属性
+  if (is.logical(vertex_attr(graph, attr_name))) {  # 如果是逻辑型
+    graph <- set_vertex_attr(graph, attr_name,      # 转为整数
+                             value = as.integer(vertex_attr(graph, attr_name)))
+  }
+}
+for (attr_name in edge_attr_names(graph)) {       # 遍历所有边属性
+  if (is.logical(edge_attr(graph, attr_name))) {
+    graph <- set_edge_attr(graph, attr_name,
+                           value = as.integer(edge_attr(graph, attr_name)))
+  }
+}
+
+E(graph)$linecolor <- as.integer(as.factor(E(graph)$linecolor))  # linecolor 转整数
+
+# ==================== 保存 ====================
+write_graph(graph, "net.graphml", format = "graphml")   # 保存为 GraphML 文件
+
+# ==================== 绘制网络图 ====================
+
+pdf("网络图+微生物丰度与基因间的相关性+正负相关2.pdf", width = 10, height = 10)
+
+# # 打开 PDF 设备，10×10 英寸
+# plot(graph,
+#      layout = layout_in_circle(graph),  # 圆形布局
+#      vertex.size = 5,
+#      vertex.label = NA,
+#      vertex.color = ifelse(V(graph)$group == "Mic", "red", "blue"))
+dev.off()   # 关闭 PDF 设备
+
+# ##参考：
+# # 1）https://blog.csdn.net/qq_39859424/article/details/124462727
+
