@@ -1,0 +1,130 @@
+# ========== 1. 设置工作环境 ==========
+rm(list=ls())                 # 清空当前环境中的所有对象，避免旧变量干扰
+# setwd("")                   # 设置工作目录（被注释掉了，需要时取消注释并填入路径）
+
+# ========== 2. 加载 R 包 ==========
+library(ggplot2)              # 加载 ggplot2，用于绘图
+library(tidyverse)            # 加载 tidyverse，包含 dplyr、tidyr 等数据处理工具
+
+# ========== 3. 加载数据 ==========
+df <- read.table("data.txt", header = 1, check.names = F, sep = "\t")
+# 从 data.txt 读取数据，制表符分隔，第一行为列名，不检查列名合法性
+df$group <- factor(df$group, levels = c("M","N","G","F"))
+# 将 group 列转换为因子，并指定水平顺序为 M、N、G、F
+
+# ========== 4. 计算标签角度 ==========
+df2 <- as.data.frame(df[c(1:10,51:62,103:114,155:166,207:208),])
+# 从 df 中按行号提取子集，组合成 df2。这些行号看起来是手动挑选的，可能对应 48 个样本
+rownames(df2) <- 1:48         # 将 df2 的行名重置为 1 到 48
+df2$group <- factor(df2$group, levels = c("M","N","G","F"))
+# 重新设定 df2 中 group 的因子水平
+df2$ID <- as.numeric(rownames(df2))   # 创建一个数值型 ID 列，值为 1 到 48
+number_of_bar <- nrow(df2)            # 条形图的总条数 = 48
+angle <- 90 - 360 * (df2$ID - 0.5) / number_of_bar
+# 计算每个条形在图中的角度，用于文字标签旋转。公式是极坐标环形图常用的角度计算
+df2$hjust <- ifelse(angle < -90, 1, 0)
+# 根据角度决定文字的水平对齐方式：角度小于 -90 度时右对齐，否则左对齐
+df2$angle <- ifelse(angle < -90, angle + 180, angle)
+# 如果角度小于 -90 度，则加 180 度，使文字正向显示
+
+# ========== 5. 确定显著性标签位置 ==========
+result <- aggregate(value ~ group3, data = df, sum)
+# 按 group3 分组，对 value 求和。注意：这里用的是原始 df，不是 df2。
+# 生成的 result 包含两列：group3 和 value。后面会用到 result$value。
+
+# ========== 6. 创建分组标签数据及位置 ==========
+df3 <- df2 %>% 
+  group_by(group) %>%                          # 按 group 分组
+  summarize(start = min(ID), end = max(ID) - 4) %>%  # 每组的起始 ID 和结束 ID（减 4 是留空隙）
+  rowwise() %>%                                # 按行操作
+  mutate(title = mean(c(start, end)))          # 计算每组的中心位置，用于放置分组标签
+df3$group <- factor(df3$group, levels = c("M","N","G","F"))
+# 重新设定 df3 中 group 的因子水平
+
+# ========== 7. 绘图 ==========
+ggplot() +
+  # ----- 手动添加辅助线 -----
+geom_hline(yintercept = 0, lty = "solid", color = "black", linewidth = 0.6) +   # y=0 的黑色实线
+  geom_hline(yintercept = 20, lty = "solid", color = "grey80") +                  # y=20 的灰色线
+  geom_hline(yintercept = 60, lty = "solid", color = "grey80") +                  # y=60 的灰色线
+  geom_hline(yintercept = 40, lty = "solid", color = "grey80") +                  # y=40 的灰色线
+  geom_hline(yintercept = 80, lty = "solid", color = "grey80") +                  # y=80 的灰色线
+  geom_hline(yintercept = 100, lty = "solid", color = "grey80") +                 # y=100 的灰色线
+  
+  # ----- 柱状堆积图绘制 -----
+geom_col(df, mapping = aes(group3, value, fill = group), 
+         color = "grey20", linewidth = 0.5, width = 0.8) +
+  # 用 df 绘制堆积柱状图，x 轴为 group3，y 轴为 value，填充色按 group 区分
+  
+  # ----- y轴范围确定 -----
+scale_y_continuous(limits = c(-25, 150)) +
+  # 设定 y 轴范围为 -25 到 150
+  
+  # ----- 颜色 -----
+scale_fill_manual(values = c("#4fbb98", "#f46024", "#dd6ab0", "#7c8ebe")) +
+  # 手动指定填充颜色，对应 group 的四个水平
+  
+  # ----- 主题 -----
+theme_void() +                                # 使用空白主题，去掉坐标轴和背景
+  theme(legend.position = 'none') +             # 隐藏图例
+  
+  # ----- 手动添加显著性（第一组 geom_text） -----
+geom_text(data = df2, 
+          aes(x = ID, y = 103, 
+              label = c("Contral", "ADOM", "LHy1", "LHA", "LFA", "SHy1", "SHA", "SFA", "RHy1", "RHA", "  ", " ",
+                        "Contral", "ADOM", "LHy1", "LHA", "LFA", "SHy1", "SHA", "SFA", "RHy1", "RHA", "  ", "  ",
+                        "Contral", "ADOM", "LHy1", "LHA", "LFA", "SHy1", "SHA", "SFA", "RHy1", "RHA", "  ", "  ",
+                        "Contral", "ADOM", "LHy1", "LHA", "LFA", "SHy1", "SHA", "SFA", "RHy1", "RHA", "  ", "  "),
+              hjust = hjust, color = group), 
+          fontface = "bold", size = 2, 
+          angle = df2$angle, inherit.aes = F) +
+  # 在 y=103 处添加样本名称标签。注意：label 是一个长度为 48 的字符向量。
+  # 这里没有出现 `...`，但如果你的实际数据或代码中 label 写成了 `...` 或包含 `...`，就会报错。
+  # 另外，color = group 在 aes() 内部，但 group 是 df2 中的列，inherit.aes=F 表示不继承全局 aes，这里应该没问题。
+  
+  # ----- 手动添加标签（第二组 geom_text，显著性星号） -----
+geom_text(data = df2, 
+          aes(x = ID, y = result$value + 4, 
+              label = c("", "", "***", "", "", "", "**", "", "", "", "", "",
+                        "", "", "**", "", "", "", "", "***", "", "", "", "",
+                        "", "***", "***", "***", "**", "***", "**", "***", "**", "***", "", "",
+                        "", "***", "", "", "", "", "", "**", "**", "", "", ""),
+              color = group), 
+          fontface = "bold", size = 3, 
+          angle = df2$angle + 90, inherit.aes = F) +
+  # 在 result$value + 4 的位置添加显著性星号。
+  # 严重注意：result$value 的长度是 group3 的组数，而 df2 有 48 行。
+  # 这里直接把 result$value 放进 aes(y = ...)，会导致长度不匹配或循环使用，可能出错。
+  # 而且 result 是基于 df 计算的，df2 是 df 的子集，group3 的对应关系可能混乱。
+  # 建议：确认 result$value 的长度是否与 df2 一致，如果不一致，需要先合并数据。
+  
+  # ----- 手动添加坐标及标题 -----
+geom_text(data = df2, x = 12, y = 40, label = "Biodegradation rate(%)", color = "black", size = 2.0) +
+  # 在 (12, 40) 处添加 y 轴标题
+  geom_text(data = df2, x = -0.2, y = 5, label = "0", color = "black", size = 2) +
+  geom_text(data = df2, x = -0.2, y = 25, label = "20", color = "black", size = 2) +
+  geom_text(data = df2, x = -0.2, y = 45, label = "40", color = "black", size = 2) +
+  geom_text(data = df2, x = -0.2, y = 65, label = "60", color = "black", size = 2) +
+  geom_text(data = df2, x = -0.2, y = 85, label = "80", color = "black", size = 2) +
+  geom_text(data = df2, x = -0.2, y = 105, label = "100", color = "black", size = 2) +
+  # 手动添加 y 轴刻度标签
+  
+  # ----- 极坐标转换 -----
+coord_polar(direction = 1) +
+  # 将笛卡尔坐标转换为极坐标，形成环状图。direction=1 表示顺时针方向。
+  
+  # ----- 分组标签 -----
+geom_text(data = df3, 
+          aes(x = title, y = 140, label = group, color = group), 
+          hjust = c(1, 1, 0, 0), angle = c(335, 250, 135, 60), size = 5, 
+          fontface = "bold", inherit.aes = F) +
+  # 在 y=140 处添加分组标签（M、N、G、F）。hjust 和 angle 是长度为 4 的向量，对应 4 个组。
+  # 注意：df3 只有 4 行，hjust 和 angle 也是 4 个值，这里匹配。
+  
+  # ----- 颜色 -----
+scale_color_manual(values = c("#4fbb98", "#f46024", "#dd6ab0", "#7c8ebe"))
+# 手动指定 color 映射的颜色，与 fill 颜色一致
+
+# ========== 8. 保存图片 ==========
+ggsave("环状柱状堆积图+分组+显著性.pdf", width = 5, height = 5, dpi = 300)
+# 保存为 PDF，尺寸 5x5 英寸，分辨率 300 dpi
