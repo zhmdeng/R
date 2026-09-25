@@ -1,0 +1,38 @@
+library("plotrix")          # 加载 plotrix 包，提供 pie3D() 等绘图函数
+
+inputFile = "input.txt"     # 输入文件：两列，第一列是标签，第二列是数值
+outFile = "pie.pdf"         # 输出文件：3D 饼图 PDF
+# setwd("")                 # 设置工作目录（已注释）
+
+# ==================== 读取并整理数据 ====================
+rt = read.table(inputFile, header = T, sep = "\t", check.names = F)
+# 读取制表符分隔的文件，第一行为列名，不修改列名
+
+x = rt[, 2]                 # 提取第 2 列数值，作为饼图各扇区的大小
+labels = as.character(rt[, 1])  # 提取第 1 列标签，转为字符型
+
+# ==================== 计算百分比并拼接标签 ====================
+piepercent = paste(round(100 * x / sum(x), 2), "%")
+# 计算每个扇区占总和的百分比，保留 2 位小数，并加上 "%"
+
+labels = paste0(labels, "\n", piepercent)
+# 把原始标签和百分比拼在一起，中间用换行符 "\n" 分隔
+
+# ==================== 绘制 3D 饼图 ====================
+p <- pie3D(x, labels = labels, height = 0.1, labelcex = 0.8,
+           explode = 0.1, theta = 0.85)
+# pie3D() 直接在当前图形设备上绘制 3D 饼图，没有返回值（返回 NULL）
+# 参数说明：
+# x       : 各扇区的数值
+# labels  : 扇区标签
+# height  : 饼图的厚度（3D 效果高度）
+# labelcex: 标签文字大小
+# explode : 扇区离中心的距离（0.1 表示稍微分开）
+# theta   : 观察角度（0.85 弧度）
+
+
+
+# ==================== 保存到 PDF ====================
+pdf(file = outFile, width = 7, height = 6)   # 打开 PDF 设备
+print(p)                                      # 打印 p（NULL，不会输出任何图形）
+dev.off()                                     # 关闭设备，保存文件

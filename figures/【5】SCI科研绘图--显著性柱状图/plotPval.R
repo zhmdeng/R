@@ -1,0 +1,58 @@
+
+
+
+# 加载 ggplot2 包，用于绘图
+library(ggplot2)
+
+# 输入文件：包含富集分析结果的文本文件（如 GO/KEGG 富集结果）
+inputFile = "input.txt"
+
+# 输出文件：生成的条形图 PDF 文件名
+outFile = "barplot.pdf"
+
+# setwd("")  # 设置工作目录（已注释掉，根据实际情况启用）
+
+# 读取输入文件：
+# header=T：第一行为列名
+# sep="\t"：制表符分隔
+# check.names=F：不自动修改列名中的特殊字符
+rt = read.table(inputFile, header = T, sep = "\t", check.names = F)
+
+# ========== 按 FDR 排序 ==========
+# 按 FDR 列降序排列（decreasing=T），提取对应的 Term 列作为因子水平顺序
+# 注意：decreasing=T 表示 FDR 值大的排在前面（通常 FDR 越小越显著，这里可能想反过来）
+labels = rt[order(rt$FDR, decreasing = T), "Term"]
+
+# 将 Term 列转换为因子，并指定水平顺序为 labels
+# 这样画图时条形会按照 labels 的顺序排列
+rt$Term = factor(rt$Term, levels = labels)
+
+# ========== 绘制条形图 ==========
+# ggplot()：创建图形对象，data=rt 指定数据
+# geom_bar()：绘制条形图
+#   aes(x=Term, y=Count, fill=FDR)：x 轴为 Term，y 轴为 Count，填充色按 FDR 映射
+#   stat='identity'：直接用 y 值作为条形高度（不进行统计变换）
+# coord_flip()：翻转坐标轴，使条形水平显示
+# scale_fill_gradient(low="red", high="blue")：FDR 值小的显示红色，大的显示蓝色
+# xlab("Term") + ylab("Gene count")：设置轴标签
+# theme()：设置轴文字颜色和大小
+# scale_y_continuous(expand=c(0,0))：y 轴不留空白
+# scale_x_discrete(expand=c(0,0))：x 轴不留空白
+# theme_bw()：使用黑白主题（白底黑线）
+p = ggplot(data = rt) +
+  geom_bar(aes(x = Term, y = Count, fill = FDR), stat = 'identity') +
+  coord_flip() +
+  scale_fill_gradient(low = "red", high = "blue") +
+  xlab("Term") + ylab("Gene count") +
+  theme(
+    axis.text.x = element_text(color = "black", size = 10),
+    axis.text.y = element_text(color = "black", size = 10)
+  ) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_bw()
+
+# 保存图片：宽度 7 英寸，高度 5 英寸
+ggsave(outFile, width = 7, height = 5)
+
+
