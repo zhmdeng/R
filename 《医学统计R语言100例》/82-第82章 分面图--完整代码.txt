@@ -1,0 +1,46 @@
+案例问题/题目：用facet_wrap()按疾病类型分面板绘制收缩压分布图（直方图+密度曲线）。
+
+环境依赖：
+- R语言（≥4.0）
+- 需安装ggplot2包（install.packages("ggplot2")）
+- 无其他第三方依赖
+
+完整代码：
+library(ggplot2)
+set.seed(42)
+
+# 模拟三种疾病数据
+dat <- data.frame(
+  疾病 = rep(c("高血压","糖尿病","慢性肾病"), each=200),
+  血压 = c(rnorm(200, 150, 12),
+          rnorm(200, 135, 10),
+          rnorm(200, 145, 15))
+)
+
+# 分面绘图
+p <- ggplot(dat, aes(x=血压)) +
+  geom_histogram(aes(y=after_stat(density)),
+                 bins=20, fill="#4DBBD5", color="white", alpha=0.7) +
+  geom_density(color="#E64B35", linewidth=1) +
+  facet_wrap(~疾病, ncol=3) +
+  labs(title="按疾病类型分面的收缩压分布",
+       x="收缩压 (mmHg)", y="密度") +
+  theme_minimal(base_size = 15)
+
+print(p)
+
+运行命令：
+Rscript 82_facet_wrap.R
+
+预期运行结果：
+生成一个包含3个并列面板的图形，每个面板显示一种疾病的直方图（蓝色填充）与红色密度曲线。高血压组峰值约150，糖尿病组约135且更集中，慢性肾病组曲线较平坦。
+
+测试建议：
+1. 将ncol改为1，观察面板纵向堆叠效果。
+2. 将bins改为30，直方图会更细密。
+3. 尝试添加scales="free_y"，各面板y轴独立缩放。
+
+常见问题或注意事项：
+1. 若报错“could not find function after_stat”，请升级ggplot2至最新版。
+2. 若使用旧版ggplot2，将linewidth改为size（新版已弃用size用于线条）。
+3. 疾病列必须为因子或字符，否则分面顺序可能不符合预期。

@@ -1,0 +1,60 @@
+案例问题/题目：
+某医院心内科收集了30名患者的血脂检查数据，存储在lipid.csv文件中（包含患者ID、年龄、性别、总胆固醇TC、甘油三酯TG、低密度脂蛋白LDL-C等字段）。请使用R语言的read.csv()函数导入该CSV文件，并查看数据的前6行及数据结构摘要。
+
+环境依赖：
+- 语言：R（版本 ≥ 4.0）
+- 运行命令：Rscript case04_readcsv.R（或在RStudio中直接运行）
+- 第三方依赖：仅使用R基础包utils（read.csv/write.csv），无需额外安装
+
+完整代码：
+# 生成模拟血脂数据并写入CSV
+set.seed(42)
+n <- 30
+lipid <- data.frame(
+  ID = 1:n,
+  Age = round(runif(n, 40, 80)),
+  Sex = sample(c("男", "女"), n, replace = TRUE),
+  TC = round(rnorm(n, 5.2, 0.8), 2),   # 总胆固醇 mmol/L
+  TG = round(rnorm(n, 1.7, 0.6), 2),   # 甘油三酯 mmol/L
+  LDL = round(rnorm(n, 3.1, 0.7), 2)   # 低密度脂蛋白 mmol/L
+)
+write.csv(lipid, "lipid.csv", row.names = FALSE)
+
+# 核心操作：读取CSV并查看前6行
+data <- read.csv("lipid.csv")
+head(data)
+str(data)
+
+# 可选附加验证
+cat("数据总行数：", nrow(data), "\n")
+cat("TC均值为：", mean(data$TC), "mmol/L\n")
+
+运行命令：
+Rscript case04_readcsv.R
+
+预期运行结果：
+（head(data)输出示例）
+  ID Age Sex   TC   TG  LDL
+1  1  60  男 5.31 1.62 3.14
+2  2  55  女 4.92 2.10 2.87
+3  3  72  男 5.87 1.45 3.56
+...（仅显示前6行）
+
+（str(data)输出摘要）
+'data.frame':	30 obs. of  6 variables:
+ $ ID : int  1 2 3 4 5 6 ...
+ $ Age: num  60 55 72 48 63 58 ...
+ $ Sex: chr  "男" "女" "男" "女" ...
+ $ TC : num  5.31 4.92 5.87 5.44 6.01 ...
+ $ TG : num  1.62 2.1 1.45 1.98 1.33 ...
+ $ LDL: num  3.14 2.87 3.56 3.22 3.78 ...
+
+测试建议：
+1. 修改n值（如n=50）重新生成数据，确认读取正确；
+2. 尝试将Sex列改为数值编码（1=男，2=女），观察str()显示类型变化；
+3. 在write.csv中设置row.names=TRUE，再读取时观察第1列变化，理解参数含义。
+
+常见问题或注意事项：
+1. read.csv()默认将第一行作为列名，若文件无标题行，需设置header=FALSE；
+2. 包含中文数据时，建议指定fileEncoding="UTF-8"防止乱码；
+3. 若某列出现非数值字符（如“5,2”而非“5.2”），read.csv()会将该列强制转为字符型，需用gsub()+as.numeric()清洗。

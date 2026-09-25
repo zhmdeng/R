@@ -1,0 +1,49 @@
+案例问题/题目：
+对50名健康受试者的血清IL-6（正偏态数据）取自然对数变换，比较变换前后偏度与直方图分布。
+
+环境依赖：
+R语言（≥4.0），仅使用base R（标准库），无需安装第三方包。
+
+完整代码：
+set.seed(123)
+il6 <- rexp(50, rate = 0.2)   # 生成正偏态数据（指数分布）
+
+# 计算偏度函数
+skew <- function(x) {
+  n <- length(x)
+  m3 <- sum((x - mean(x))^3) / n
+  m2 <- sum((x - mean(x))^2) / n
+  m3 / (m2^(3/2))
+}
+
+skew_before <- skew(il6)
+il6_log <- log(il6)           # 对每个值取自然对数
+skew_after <- skew(il6_log)
+
+# 画图对比
+par(mfrow = c(1, 2))
+hist(il6, main = "变换前", col = "skyblue", xlab = "IL-6")
+hist(il6_log, main = "对数变换后", col = "orange", xlab = "log(IL-6)")
+
+# 输出偏度值（可选）
+cat("变换前偏度:", skew_before, "\n")
+cat("变换后偏度:", skew_after, "\n")
+
+运行命令：
+Rscript case64_log_transform.R
+
+预期运行结果：
+（数值可能因随机种子固定而一致）
+变换前偏度: 2.048
+变换后偏度: 0.621
+并输出两幅直方图，左侧右偏严重，右侧对称。
+
+测试建议：
+1. 修改rate为0.1或0.5，观察偏度变化。
+2. 使用shapiro.test(il6_log)验证正态性p值。
+3. 若数据包含0，改为log(il6+1)。
+
+常见问题或注意事项：
+- 对数变换只适用于正值；含0时用log(x+1)。
+- 变换后仍需检验正态性，避免仅凭图形判断。
+- 回归中若使用对数因变量，解释为百分比变化效应。

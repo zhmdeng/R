@@ -1,0 +1,53 @@
+案例问题/题目：
+构建logistic回归模型（高血压~年龄+吸烟），使用exp(coef())提取年龄和吸烟的优势比（OR），并计算95%置信区间。
+
+环境依赖：
+R语言（≥4.0），仅需基础包stats，无需第三方包。运行命令：Rscript case43.R
+
+完整代码：
+# 案例43：OR值计算——用exp(coef())提取逻辑回归的优势比
+set.seed(123)  # 固定随机种子，保证结果可复现
+n <- 80
+age <- rnorm(n, 55, 10)          # 模拟年龄
+smoking <- rbinom(n, 1, 0.4)     # 模拟吸烟状态
+logit <- -3 + 0.05*age + 1.2*smoking
+hypertension <- rbinom(n, 1, plogis(logit))  # 模拟高血压结局
+
+# 拟合logistic回归
+model <- glm(hypertension ~ age + smoking, family = binomial)
+
+# 提取系数并转换为OR
+OR_point <- exp(coef(model))          # OR点估计
+CI <- exp(confint(model))             # OR的95%置信区间（profile似然比法）
+
+# 整理结果表
+result <- data.frame(
+  OR = round(OR_point, 3),
+  CI_lower = round(CI[, 1], 3),
+  CI_upper = round(CI[, 2], 3)
+)
+print(result)
+
+# 若需快速查看P值
+# print(summary(model)$coefficients[, 4])
+
+运行命令：
+Rscript case43.R
+
+预期运行结果：
+                 OR CI_lower CI_upper
+(Intercept) 0.045    0.004    0.387
+age         1.051    1.020    1.087
+smoking     3.526    1.267   10.148
+（注：因随机种子固定，结果完全可复现。年龄OR > 1且CI下限>1，提示年龄为危险因素；吸烟OR≈3.5，CI不包含1，有统计学意义。）
+
+测试建议：
+1. 将模拟公式中age的系数改为0（如logit <- -2 + 0*age + 1.2*smoking），重跑后age的OR应接近1，CI包含1。
+2. 对比confint()与confint.default()（Wald法）结果差异，尤其在小样本时。
+3. 尝试增加样本量（n=500），观察置信区间变窄。
+
+常见问题或注意事项：
+1. 务必同时exponentiate系数和置信区间，不能只对点估计转换。
+2. 截距项的OR无临床解释意义，可忽略。
+3. 若提示“glm.fit: fitted probabilities numerically 0 or 1”，可检查数据是否完全分离，考虑使用Firth惩罚逻辑回归（需安装logistf包）。
+4. 药物研究中常用OR，但队列研究请使用RR或HR，勿混淆。

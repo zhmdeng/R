@@ -1,0 +1,51 @@
+案例问题/题目：
+85、热图：用pheatmap包绘制基因表达热图。基于模拟表达矩阵，绘制带样本分组注释和聚类树的热图。
+
+环境依赖：
+R >= 4.0；需要安装pheatmap包。运行命令：Rscript case85_heatmap.R
+
+完整代码：
+
+# 85_heatmap.R
+# 若未安装pheatmap，先运行：install.packages("pheatmap")
+library(pheatmap)
+
+# 1. 模拟数据：15基因 × 6样本（3正常+3肿瘤）
+set.seed(123)
+expr <- matrix(rnorm(90, mean=6, sd=2), nrow=15,
+               dimnames=list(paste0("Gene", 1:15),
+                             c("N1","N2","N3","T1","T2","T3")))
+# 让前5个基因在肿瘤样本（第4-6列）中表达上调
+expr[1:5, 4:6] <- expr[1:5, 4:6] + 3
+
+# 2. 样本分组注释
+annotation_col <- data.frame(
+  组别 = factor(rep(c("Normal", "Tumor"), each=3)),
+  row.names = colnames(expr)
+)
+
+# 3. 绘制热图
+pheatmap(expr,
+         annotation_col = annotation_col,
+         color = colorRampPalette(c("blue", "white", "red"))(100),
+         cluster_rows = TRUE, cluster_cols = TRUE,
+         show_rownames = TRUE, show_colnames = TRUE,
+         main = "Gene Expression Heatmap (模拟数据)")
+
+运行命令：
+Rscript case85_heatmap.R
+（或在RStudio中选中代码逐段运行）
+
+预期运行结果：
+显示一个热图窗口。行有15个基因，列有6个样本。样本顶部有分组注释条，Normal为一种颜色，Tumor为另一种颜色。前5个基因在T1-T3样本中显示为红色（高表达），其余区域为蓝色或浅色。行和列均显示聚类树。
+
+测试建议：
+1. 修改expr中的rnorm的均值和标准差，观察颜色深浅变化。
+2. 将scale="row"加入pheatmap参数，查看行标准化后的差异。
+3. 增加样本或基因数，测试大型热图的性能。
+
+常见问题或注意事项：
+- 确保annotation_col的row.names与expr的colnames完全一致。
+- 若出现“Error in annotation_col ...”，检查是否有缺失或重复列名。
+- 热图颜色映射可在colorRampPalette中调整，如改用c("green","black","red")。
+- 保存图片用pdf("heatmap.pdf")或ggsave("heatmap.png")。

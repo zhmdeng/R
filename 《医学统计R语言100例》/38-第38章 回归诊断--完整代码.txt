@@ -1,0 +1,43 @@
+案例问题/题目：回归诊断：用plot(lm)查看残差图等诊断图形。基于mtcars数据集，对mpg~wt+hp的线性模型进行残差诊断，识别异常点和模型假设违背情况。
+
+环境依赖：R 4.0+，仅需R内置数据集mtcars，无需安装第三方包。运行命令：Rscript case38.R
+
+完整代码：
+# 文件：case38.R
+# 功能：线性回归诊断
+
+# 建立线性回归模型
+model <- lm(mpg ~ wt + hp, data = mtcars)
+
+# 设置2x2画布，展示全部4幅诊断图
+par(mfrow = c(2, 2))
+plot(model)
+
+# 使用influence.measures识别强影响点
+influence <- influence.measures(model)
+outliers <- which(apply(influence$is.inf, 1, any))
+cat("潜在强影响点：", names(outliers), "\n")
+
+# 输出模型系数摘要（辅助判断）
+cat("\n模型系数：\n")
+print(coef(model))
+
+运行命令：Rscript case38.R
+
+预期运行结果：
+1. 屏幕显示4幅诊断图（残差vs拟合、Q-Q、标准化残差vs拟合、Cook距离）；
+2. 文本输出：
+   潜在强影响点： Maserati Bora Ford Pantera L
+   模型系数： (Intercept)  wt  hp 
+              37.22727    -3.87783  -0.03177
+
+测试建议：
+1. 将模型改为lm(mpg~wt)再运行，对比第2幅Q-Q图形态变化；
+2. 使用which=c(1,2,4)只显示关键图，观察是否存在异方差趋势；
+3. 删除强影响点后重新拟合，查看系数变化幅度。
+
+常见问题或注意事项：
+1. 必须先用par(mfrow=c(2,2))设置画布，否则plot(model)每次只覆盖前一张图；
+2. Q-Q图轻微弯曲在样本量小时属正常，不要过度解读；
+3. influence.measures的is.inf矩阵，TRUE表示该点在某项指标上超阈值；
+4. 高杠杆点（如车辆重量极大）不一定是有害的，需结合Cook距离综合判断。

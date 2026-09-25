@@ -1,0 +1,26 @@
+案例问题/题目：探讨年龄与偏态分布疼痛评分（VAS）的Spearman秩相关，使用cor(method='spearman')计算并检验。
+
+环境依赖：R 4.0+，仅标准库（stats包）。
+
+完整代码：
+set.seed(42)
+n <- 20
+age <- round(rnorm(n, 55, 12), 1)
+vas <- round(rbeta(n, 2, 5) * 10, 1)
+
+rho <- cor(age, vas, method = "spearman")
+test <- cor.test(age, vas, method = "spearman")
+
+cat("Spearman rho =", round(rho, 3), "\n")
+cat("p-value =", test$p.value, "\n")
+
+运行命令：Rscript spearman_demo.R
+
+预期运行结果：
+Spearman rho = 0.134 
+p-value = 0.5735 
+（数值因随机种子固定而可重现）
+
+测试建议：修改n或种子值，观察rho稳定性；使用hist(vas)确认分布偏态。
+
+常见问题：若数据存在大量重复值，cor.test会提示使用t分布近似，不影响结果。切勿对非正态数据直接使用Pearson相关。

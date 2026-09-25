@@ -1,0 +1,44 @@
+案例问题/题目：
+使用corrplot包绘制mtcars数据集的相关矩阵图，展示变量间的线性相关强度与方向，并通过层次聚类排序增强模式识别。
+
+环境依赖：
+- R语言（版本≥4.0）
+- 需安装第三方包：corrplot（install.packages("corrplot")）
+- 运行命令：Rscript 本脚本.R 或 在RStudio中交互运行
+
+完整代码：
+# 安装并加载包
+install.packages("corrplot")
+library(corrplot)
+
+# 计算相关矩阵（仅数值列）
+data(mtcars)
+mat <- cor(mtcars[sapply(mtcars, is.numeric)])
+
+# 绘制相关矩阵图（聚类排序+颜色+系数标签）
+corrplot(mat,
+         method = "color",
+         order = "hclust",
+         addCoef.col = "black",
+         tl.col = "black",
+         tl.srt = 45,
+         number.cex = 0.7,
+         sig.level = 0.05,
+         insig = "blank")
+
+运行命令：
+Rscript chapter86_corrplot.R
+
+预期运行结果：
+图形窗口显示一个彩色相关矩阵热图，变量按层次聚类重排。颜色从深蓝（正相关1）到深红（负相关-1）渐变，每个格子内显示相关系数数值。无明显模式的格子（p>0.05）留白。
+
+测试建议：
+1. 尝试修改method="circle"或"pie"，观察形状变化。
+2. 使用res <- cor.mtest(mat, conf.level=0.95)后传入p.mat=res$p，并设置sig.level=0.05，此时insig参数生效，可显示显著性星标。
+3. 若数据含缺失值，先执行mat <- cor(na.omit(data))。
+
+常见问题或注意事项：
+- corrplot不接受NA相关矩阵，务必先处理缺失值。
+- 若标签文字重叠，调整tl.cex（如0.8）或tl.srt角度。
+- 本示例未提供p.mat，因此sig.level参数实际无效；如需显著性标记，必须同时传入p.mat。
+- 在Linux服务器无图形界面时，请使用pdf("corrplot.pdf")保存输出。

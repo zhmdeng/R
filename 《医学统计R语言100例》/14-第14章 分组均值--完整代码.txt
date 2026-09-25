@@ -1,0 +1,46 @@
+案例问题/题目：如何使用tapply()按性别分组计算平均血压（SBP）？
+
+环境依赖：R语言 4.0+，仅标准库（无需安装第三方包）。
+
+完整代码：
+# 生成模拟数据（固定种子，保证可复现）
+set.seed(123)
+n <- 30
+sex <- factor(rep(c("男", "女"), each = n/2))
+sbp <- round(rnorm(n, mean = 128, sd = 12))
+
+# 用 tapply 计算分组均值
+mean_by_sex <- tapply(sbp, sex, mean)
+
+# 展示结果
+print(mean_by_sex)
+
+# 扩展：同时计算标准差和样本量
+tapply(sbp, sex, function(x) c(mean = mean(x), sd = sd(x), n = length(x)))
+
+运行命令：Rscript case14_tapply.R
+
+预期运行结果：
+> print(mean_by_sex)
+男       女 
+128.4667 128.6667 
+
+> tapply(sbp, sex, function(x) c(mean = mean(x), sd = sd(x), n = length(x)))
+$男
+     mean        sd         n 
+128.46667  14.56198  15.00000 
+
+$女
+     mean        sd         n 
+128.66667  11.65601  15.00000
+
+测试建议：
+1. 将n改为50或100，确认分组均值仍然正常计算。
+2. 将sex改为“治疗组/对照组”，测试函数通用性。
+3. 在sbp中手动设置一个NA值，观察tapply默认行为（会返回错误或剔除NA），再尝试传入na.rm=TRUE。
+
+常见问题或注意事项：
+- tapply的INDEX参数必须是因子，若不是请用factor()转换。
+- 当分组变量有多个维度时，可以用list(sex, age_group)实现交叉分组。
+- tapply返回的是向量或列表，如需数据框结果，建议改用aggregate()。
+- 若分组水平为空（如因子水平无实际数据），tapply会返回NA，注意检查数据。

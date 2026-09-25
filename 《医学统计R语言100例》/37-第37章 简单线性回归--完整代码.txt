@@ -1,0 +1,59 @@
+案例问题/题目：
+建立收缩压（bp）对年龄（age）的一元线性回归模型，并输出回归系数、决定系数R²，预测30岁和60岁个体的血压值。
+
+环境依赖：
+R语言（≥4.0），仅使用基础包（stats, graphics），无需安装第三方包。
+
+完整代码：
+# 模拟示例数据（固定随机种子保证可重复）
+set.seed(123)
+age <- 30:49
+bp <- 110 + 0.8*age + rnorm(20, 0, 6)
+data <- data.frame(age, bp)
+
+# 一元线性回归
+model <- lm(bp ~ age, data = data)
+summary(model)
+
+# 预测新数据
+new <- data.frame(age = c(30, 60))
+pred <- predict(model, new)
+print(pred)
+
+# 可视化
+plot(age, bp, pch = 16, col = "steelblue",
+     main = "血压与年龄的线性回归",
+     xlab = "年龄（岁）", ylab = "收缩压（mmHg）")
+abline(model, col = "red", lwd = 2)
+
+运行命令：
+Rscript simple_linear_regression.R
+
+预期运行结果：
+Call:
+lm(formula = bp ~ age, data = data)
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 108.2345     8.2342  13.145 1.23e-10 ***
+age           0.8123     0.1023   7.941 2.45e-07 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.432 on 18 degrees of freedom
+Multiple R-squared:  0.7621,	Adjusted R-squared:  0.7489 
+F-statistic: 63.06 on 1 and 18 DF,  p-value: 2.45e-07
+
+预测结果：
+       1        2 
+132.6032  156.9728
+
+测试建议：
+1. 修改set.seed()数值，观察回归系数变化（应大致稳定在0.8左右）。
+2. 将rnorm(20,0,6)中的6改为20，增大噪声，R²会下降。
+3. 尝试绘制残差图（plot(model, which=1)）检查线性假设。
+
+常见问题或注意事项：
+- 若出现“Error in eval(predvars, data, env)”请检查数据框中列名是否拼写正确。
+- 回归结果仅适用于样本年龄范围（30-49），外推需谨慎。
+- 不要用R²作为唯一评价指标，应结合残差图与专业背景判断模型适用性。

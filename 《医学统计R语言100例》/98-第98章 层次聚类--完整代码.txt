@@ -1,0 +1,41 @@
+案例问题/题目：对iris数据集前4个数值变量进行层次聚类，绘制树状图并标出3类分组。
+
+环境依赖：
+- 语言：R（版本≥4.0）
+- 运行命令：Rscript 脚本名.R 或 在RStudio中运行
+- 第三方依赖：仅使用内置datasets和stats，无额外包。
+
+完整代码：
+# 层次聚类案例（iris）
+data(iris)
+X <- scale(iris[, 1:4])
+
+d <- dist(X, method = "euclidean")
+hc <- hclust(d, method = "ward.D2")
+
+# 绘图
+plot(hc, labels = FALSE, hang = -1,
+     main = "Iris层次聚类树状图",
+     xlab = "样本编号", ylab = "高度")
+rect.hclust(hc, k = 3, border = 2:4)
+
+# 输出聚类归属（前5个）
+cat("前5个样本聚类标签：", cutree(hc, k = 3)[1:5], "\n")
+
+运行命令：
+Rscript hclust_iris.R
+
+预期运行结果：
+1. 绘图窗口出现树状图，底部为150个样本，高度约0-25。
+2. 树上被红、绿、蓝三个矩形框标记出3个簇。
+3. 控制台输出：前5个样本聚类标签：1 1 1 1 1
+
+测试建议：
+- 将method改为"single"，观察链状效应。
+- 修改rect.hclust中的k=2或4，查看分组变化。
+- 不使用scale()，对比结果差异。
+
+常见问题或注意事项：
+- 若样本量大，dist()可能内存不足，可随机抽样或使用fastcluster包。
+- ward.D2对异常值较敏感，建议先检查数据分布。
+- 树状图标签过多时可设置labels=FALSE，避免重叠。

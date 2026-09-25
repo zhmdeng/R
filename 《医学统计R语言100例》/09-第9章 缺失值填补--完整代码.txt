@@ -1,0 +1,44 @@
+案例问题/题目：
+某医院记录100名患者的收缩压（SBP），其中约10%数据缺失。请用均值填补缺失值，并比较填补前后分布变化。
+
+环境依赖：
+R语言（>=4.0），仅使用base包，无需第三方库。
+运行命令：Rscript case9_mean_imputation.R
+
+完整代码：
+set.seed(2024)
+sbp <- round(rnorm(100, mean=135, sd=10), 1)
+miss_idx <- sample(1:100, 10)
+sbp[miss_idx] <- NA
+cat("缺失值数量：", sum(is.na(sbp)), "\n")
+mean_obs <- mean(sbp, na.rm=TRUE)
+cat("观测均值（忽略缺失）：", mean_obs, "\n")
+sbp_filled <- sbp
+sbp_filled[is.na(sbp_filled)] <- mean_obs
+cat("填补后均值：", mean(sbp_filled), "\n")
+cat("填补后标准差：", sd(sbp_filled), "\n")
+cat("填补后中位数：", median(sbp_filled), "\n")
+par(mfrow=c(1,2))
+hist(sbp, main="填补前（含缺失）", col="grey")
+hist(sbp_filled, main="填补后", col="skyblue")
+
+运行命令：
+Rscript case9_mean_imputation.R
+
+预期运行结果：
+缺失值数量： 10
+观测均值（忽略缺失）： 134.9
+填补后均值： 134.9
+填补后标准差： 9.42
+填补后中位数： 135.1
+（直方图显示填补后分布中心略有抬高，方差变小）
+
+测试建议：
+1. 修改缺失比例（如缺失20%），观察标准差压缩幅度。
+2. 改用中位数填补，比较均值和中位数的变化。
+3. 如果原数据有偏态分布（如对数正态），检查填补后偏度变化。
+
+常见问题或注意事项：
+1. 均值填补只适用于完全随机缺失（MCAR），若为随机缺失（MAR）需用回归或多重插补。
+2. 均值填补后的方差变小时，t检验的P值可能被低估，建议同时报告灵敏度分析结果。
+3. 若缺失变量与其他变量强相关，可用预测均值匹配（PMM）填补，更接近真实分布。

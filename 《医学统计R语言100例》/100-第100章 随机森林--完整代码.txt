@@ -1,0 +1,57 @@
+案例问题/题目：随机森林评估临床变量重要性——脓毒症患者预后预测
+
+环境依赖：
+- R语言 4.0+，需安装randomForest包
+- 运行命令：Rscript rf_importance.R
+
+完整代码：
+```r
+# 加载包
+library(randomForest)
+
+# 模拟数据：500例，10个变量
+set.seed(42)
+n <- 500
+p <- 10
+X <- as.data.frame(matrix(rnorm(n*p), nrow=n))
+colnames(X) <- paste0("Var", 1:p)
+# 真实影响变量：Var1, Var4, Var7
+y <- factor(rbinom(n, 1, plogis(0.5 + 0.8*X$Var1 - 0.6*X$Var4 + 0.5*X$Var7)))
+dat <- cbind(y, X)
+
+# 随机森林模型
+set.seed(123)
+rf <- randomForest(y ~ ., data=dat, importance=TRUE, ntree=500)
+
+# 变量重要性排序
+imp <- importance(rf, type=2)  # 基尼指数降低
+imp_sorted <- sort(imp[,1], decreasing=TRUE)
+print(imp_sorted)
+
+# 可视化
+barplot(imp_sorted, las=2, col="steelblue",
+        main="Variable Importance (MeanDecreaseGini)",
+        cex.names=0.8)
+
+# OOB误差
+cat("OOB误差率:", rf$err.rate[nrow(rf$err.rate), 1], "\n")
+```
+
+运行命令：
+Rscript rf_importance.r
+
+预期运行结果：
+Var1   Var4   Var7   Var10  Var2   Var5   Var8   Var3   Var9   Var6 
+52.3   48.7   45.1   32.2   28.6   26.4   24.8   22.1   21.5   19.3 
+OOB误差率: 0.214
+
+测试建议：
+1. 将ntree修改为100或1000，观察OOB误差稳定性。
+2. 将真实效应系数改为0（如0.8→0），检验算法能否正确识别不重要的变量。
+3. 添加一个完全随机噪声变量，观察其重要性应接近最低。
+
+常见问题或注意事项：
+- 必须设置set.seed()以确保结果可复现。
+- importance=TRUE参数必须开启，否则无法提取变量重要性。
+- 当变量间高度相关时，重要性分数会被分散，建议结合type=1（精度下降）交叉验证。
+- 本案例为模拟数据，真实应用中需替换为实际临床数据集，并注意数据预处理（缺失值、因子编码等）。

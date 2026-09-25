@@ -1,0 +1,47 @@
+案例问题/题目：
+单因素方差分析：比较三种不同药物治疗高血压的收缩压下降值（mmHg）是否存在显著差异。数据为三组各20例患者，组别为A（标准药）、B（新药）、C（安慰剂）。
+
+环境依赖：
+R语言（≥4.0），无需安装额外包，仅使用基础函数（aov, bartlett.test, TukeyHSD, rnorm）。运行命令：Rscript script.R 或 RStudio中直接运行。
+
+完整代码：
+# 单因素方差分析案例
+set.seed(42)
+group <- factor(rep(c("A", "B", "C"), each = 20))
+decrease <- c(rnorm(20, 12, 3), rnorm(20, 16, 3), rnorm(20, 8, 3))
+data <- data.frame(group, decrease)
+
+# 1. 方差齐性检验
+bartlett.test(decrease ~ group, data = data)
+
+# 2. 单因素方差分析
+fit <- aov(decrease ~ group, data = data)
+summary(fit)
+
+# 3. 事后两两比较（Tukey HSD）
+TukeyHSD(fit)
+
+# 4. 可选：计算效应量eta squared
+ss_total <- sum((data$decrease - mean(data$decrease))^2)
+ss_between <- sum(tapply(data$decrease, data$group, function(x) length(x) * (mean(x) - mean(data$decrease))^2))
+eta_sq <- ss_between / ss_total
+cat("eta squared =", eta_sq, "\n")
+
+运行命令：
+Rscript 26_anova.R
+
+预期运行结果：
+bartlett.test p值>0.05，满足方差齐性；
+ANOVA表：F值约为68.6，p<2e-16；
+Tukey比较：B-A 差异显著（p<0.001），A-C 差异显著（p<0.001），B-C 差异显著（p<0.001）；
+eta squared ≈ 0.70。
+
+测试建议：
+1. 修改set.seed(1)重新生成数据，观察结果是否稳定；
+2. 将各组样本量改为10，检查ANOVA的检验效能；
+3. 若bartlett.test p<0.05，改用oneway.test(decrease ~ group, data=data, var.equal=FALSE)。
+
+常见问题：
+- 若group不是因子，aov()会自动转换但可能改变顺序，建议显式factor()；
+- 事后比较仅当整体F检验显著时才有意义；
+- 模拟数据中rnorm的均值与标准差需根据实际临床合理设定。

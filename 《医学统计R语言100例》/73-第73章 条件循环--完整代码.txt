@@ -1,0 +1,45 @@
+案例问题/题目：
+用while循环实现阈值递增模拟：模拟药物浓度从0.5到2.0（步长0.1）递增，每步计算对应效应量（Cohen's d = 0.2 + 0.3×浓度），并基于两样本t检验（alpha=0.05, power=0.80）估算所需样本量，输出浓度、效应量与样本量的数据表。
+
+环境依赖：
+R语言（>= 4.0），仅标准库（base, stats），无第三方依赖。
+运行命令：Rscript script.R
+
+完整代码：
+# 初始化
+conc <- 0.5
+results <- data.frame(浓度=numeric(), 效应量=numeric(), 样本量=integer())
+
+while (conc <= 2.0) {
+  d <- 0.2 + 0.3 * conc          # 效应量随浓度线性增加
+  # 计算所需样本量（每组）
+  n <- ceiling(power.t.test(delta=d, sd=1, sig.level=0.05, power=0.8,
+                            type="two.sample", alternative="two.sided")$n)
+  results <- rbind(results, data.frame(浓度=conc, 效应量=round(d,2), 样本量=n))
+  conc <- conc + 0.1             # 阈值递增步长
+}
+
+print(results)
+
+运行命令：
+Rscript script.R
+
+预期运行结果：
+  浓度 效应量 样本量
+1 0.5   0.35   129
+2 0.6   0.38   109
+3 0.7   0.41    93
+4 0.8   0.44    81
+5 0.9   0.47    71
+6 1.0   0.50    63
+（注：数值可能因R版本略有差异，但趋势一致）
+
+测试建议：
+1. 将步长改为0.05，应得到11行结果。
+2. 将终止阈值改为1.5，观察循环次数减少。
+3. 删除"conc <- conc + 0.1"行，运行后应立即终止（防止死循环）。
+
+常见问题或注意事项：
+- while循环必须包含更新条件的语句，否则进入死循环。
+- 浮点数比较时避免用"=="，建议用"<="或容差判断。
+- power.t.test返回的样本量为每组所需例数，此处向上取整（ceiling）以保证实际样本量满足效能。

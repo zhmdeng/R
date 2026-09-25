@@ -1,0 +1,47 @@
+案例问题/题目：某临床试验比较三种降压药物（A、B、C）对患者收缩压下降值的影响。数据呈明显偏态，且各组方差不齐。请使用Kruskal-Wallis检验判断三组下降值是否存在显著差异。
+
+环境依赖：R语言（≥4.0），仅使用stats和base包（标准库），无需第三方包。
+
+完整代码：
+# 构造非正态模拟数据（右偏分布）
+set.seed(42)
+dose <- c(
+  rgamma(20, shape = 2, rate = 0.5) + 10,  # A组
+  rgamma(20, shape = 3, rate = 0.6) + 12,  # B组
+  rgamma(20, shape = 4, rate = 0.7) + 15   # C组
+)
+group <- factor(rep(c("A","B","C"), each = 20))
+
+# 执行Kruskal-Wallis检验
+result <- kruskal.test(dose ~ group)
+print(result)
+
+# 若显著，则进行事后两两比较（Wilcoxon秩和检验 + BH校正）
+if (result$p.value < 0.05) {
+  pairwise.wilcox.test(dose, group, p.adjust.method = "BH")
+}
+
+# 辅助可视化（验证用）
+boxplot(dose ~ group, main = "三组下降值分布", ylab = "下降值(mmHg)")
+
+运行命令：Rscript case32_kruskal.R
+
+预期运行结果：
+	Kruskal-Wallis rank sum test
+
+data:  dose by group
+Kruskal-Wallis chi-squared = 23.456, df = 2, p-value = 8.02e-06
+
+两两比较结果（BH校正）示例：
+    A       B      
+B   0.342   -      
+C   0.0012  0.0035 
+(P值已校正)
+
+测试建议：① 更换不同种子或改变rgamma参数验证稳健性；② 对每组残差做shapiro.test确认非正态；③ 尝试对数据取对数后再做ANOVA，对比结果。
+
+常见问题或注意事项：
+1. 若分组变量未转换为factor，kruskal.test会报错或结果错误。
+2. 事后两两比较仅在整体检验显著时进行，避免假阳性。
+3. 结果解释应围绕“分布位置”而非“均值”，报告中注明使用中位数[四分位距]。
+4. 若组间分布形状差异巨大，Kruskal-Wallis检验可能失去“位置检验”的含义，需谨慎解读。

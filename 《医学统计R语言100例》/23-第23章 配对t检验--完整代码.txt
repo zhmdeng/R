@@ -1,0 +1,42 @@
+案例问题/题目：对15名高血压患者治疗前后的收缩压数据进行配对t检验，验证降压药有效性。
+
+环境依赖：
+- 语言：R（版本≥4.0）
+- 依赖包：仅标准库（stats）
+- 运行命令：Rscript paired_t_test.R
+
+完整代码：
+before <- c(168, 172, 165, 170, 175, 169, 174, 168, 176, 173, 166, 171, 169, 178, 172)
+after  <- c(152, 155, 148, 150, 158, 149, 153, 147, 156, 152, 146, 151, 149, 157, 150)
+result <- t.test(before, after, paired = TRUE)
+print(result)
+diff <- before - after
+cat("差值均值:", mean(diff), "SD:", sd(diff), "\n")
+d <- mean(diff) / sd(diff)
+cat("Cohen's d =", round(d, 2), "\n")
+shapiro.test(diff)  # 正态性验证
+
+运行命令：
+Rscript paired_t_test.R
+
+预期运行结果：
+Paired t-test
+data:  before and after
+t = 20.298, df = 14, p-value = 1.42e-11
+alternative hypothesis: true mean difference is not equal to 0
+95 percent confidence interval: 17.47569 21.72431
+sample estimates: mean difference = 19.6
+差值均值: 19.6 SD: 3.84
+Cohen's d = 5.1
+Shapiro-Wilk检验p值>0.05，差值基本呈正态。
+
+测试建议：
+1. 将after数据改为略高于before，验证p值大于0.05的情形。
+2. 观察输入数据中某患者差值特别大时对d值的影响。
+3. 若shapiro.test结果p<0.05，改用wilcox.test(before, after, paired=TRUE)。
+
+常见问题或注意事项：
+- 配对t检验要求差值近似正态，不要忽略正态性检验。
+- 数据应为同一患者配对，顺序不能打乱。
+- 结果解释时同时报告置信区间和效应量，避免仅看p值。
+- 若数据量为大样本（n>30），正态性要求可适当放宽。

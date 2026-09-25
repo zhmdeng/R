@@ -1,0 +1,49 @@
+案例问题/题目：
+第78章：ggplot2箱线图——绘制分组箱线图并添加抖动点。模拟三种治疗组的IL-6浓度数据，用ggplot2绘制带抖动点的分组箱线图，展示分布差异。
+
+环境依赖：
+- R语言（>= 4.0）
+- 需安装ggplot2包（install.packages("ggplot2")）
+- 运行方式：Rscript 或 R GUI
+
+完整代码：
+# 加载包
+library(ggplot2)
+
+# 构造示例数据（模拟真实医学数据）
+set.seed(123)
+data <- data.frame(
+  group = rep(c("Drug_A", "Drug_B", "Placebo"), each = 30),
+  IL6 = c(rnorm(30, 12, 3), rnorm(30, 15, 4), rnorm(30, 18, 5))
+)
+
+# 绘制分组箱线图 + 抖动点
+p <- ggplot(data, aes(x = group, y = IL6, fill = group)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6) +
+  geom_jitter(aes(color = group), width = 0.2, alpha = 0.5, size = 2) +
+  scale_fill_manual(values = c("#5DADE2", "#58D68D", "#F5B041")) +
+  scale_color_manual(values = c("#2E86C1", "#2ECC71", "#D68910")) +
+  labs(x = "Treatment Group", y = "IL-6 Concentration (pg/mL)",
+       title = "IL-6 Distribution by Group") +
+  theme_bw(base_size = 14) +
+  theme(legend.position = "none")
+
+# 显示图形并保存
+print(p)
+ggsave("grouped_boxplot_jitter.png", p, width = 6, height = 4)
+
+运行命令：
+Rscript 78_boxplot_jitter.R
+
+预期运行结果：
+生成一幅分组箱线图，包含三个箱体和对应的彩色抖动点。Drug_A组中位数约12，Drug_B组约15，Placebo组约18；各组分布呈正态形态，抖动点均匀分散在箱体两侧。
+
+测试建议：
+1. 修改width参数为0.1或0.3，观察点分散程度变化。
+2. 修改alpha参数为0.3或0.7，测试透明度效果。
+3. 使用内置数据集iris替换数据，验证代码通用性（将y改为Petal.Length，x改为Species）。
+
+常见问题或注意事项：
+- 若数据量极大（>1000点），抖动点可能造成渲染缓慢，可适当减小size。
+- 若担心异常值影响，可在geom_jitter前先用dplyr::filter过滤极端值。
+- 输出图片中若箱体与点颜色相近，可增大fill和color的对比度。

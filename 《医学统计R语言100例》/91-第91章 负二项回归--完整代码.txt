@@ -1,0 +1,52 @@
+案例问题/题目：某医院研究急性哮喘患者过去三个月急诊就诊次数（y），影响因素包含年龄（age，岁）、吸烟状态（smoke，0=否，1=是）和每日吸入糖皮质激素剂量（dose，μg）。数据表现出过离散（方差>均值），需用负二项回归替代泊松回归。
+
+环境依赖：R 4.1+，需安装MASS包（install.packages("MASS")）。运行命令：source("nb_regression.R") 或直接在R控制台逐行执行。
+
+完整代码：
+# 案例91：负二项回归处理过离散计数数据
+# 加载包
+library(MASS)
+
+# 模拟数据（固定种子，确保结果可复现）
+set.seed(42)
+n <- 100
+age <- rnorm(n, 45, 10)
+smoke <- rbinom(n, 1, 0.3)
+dose <- runif(n, 200, 800)
+# 真实模型：log(mu) = 0.4 + 0.6*smoke - 0.001*dose + 0.01*age
+mu <- exp(0.4 + 0.6*smoke - 0.001*dose + 0.01*age)
+# 生成负二项计数，theta=2.5 控制过离散程度
+y <- rnegbin(n, mu = mu, theta = 2.5)
+
+df <- data.frame(y, age, smoke, dose)
+
+# 负二项回归
+nb_model <- glm.nb(y ~ age + smoke + dose, data = df)
+summary(nb_model)
+
+# 对比泊松回归的AIC
+pois_model <- glm(y ~ age + smoke + dose, data = df, family = poisson)
+cat("泊松AIC:", AIC(pois_model), "\n")
+cat("负二项AIC:", AIC(nb_model), "\n")
+cat("离散参数θ:", nb_model$theta, "\n")
+
+# 计算风险比（IRR）
+IRR <- exp(coef(nb_model))
+print(IRR)
+
+运行命令：source("nb_regression.R")（在R工作目录下执行）
+
+预期运行结果：
+- 负二项AIC明显小于泊松AIC（差值通常超过10）
+- θ估计值接近2.5（模拟真值）
+- 吸烟系数约0.6，对应IRR约1.82
+- 剂量系数为负，表示剂量每增加1μg，急诊次数风险降低约0.1%
+
+测试建议：将模拟中的theta=2.5改为theta=10（近似泊松），重新运行，观察AIC差异缩小、θ估计增大；或修改系数0.6为0，确认吸烟效应消失。
+
+常见问题或注意事项：
+1. glm.nb()要求因变量为非负整数，若数据含小数需先取整。
+2. 若数据存在大量零值（超过50%），需考虑零膨胀负二项模型（pscl包）。
+3. 检查模型残差是否仍有模式（如plot(nb_model)），若存在严重偏差，需考虑交互项或非线性项。
+4. 过离散的简单检验：均值远小于方差（如本例中均值1.2，方差2.8），若无明显过离散，泊松回归即可。
+5. 解释系数时，需对连续变量（如dose）使用每单位变化的风险比（IRR），对分类变量（smoke）使用组间风险比。

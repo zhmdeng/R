@@ -1,0 +1,48 @@
+案例问题/题目：使用scale()将临床生化指标（ALT、AST、肌酐）标准化为z分数，便于多指标比较。
+
+环境依赖：R语言（≥3.5.0），仅使用base包，无需安装第三方包。
+
+完整代码：
+# 模拟一份小型临床数据集（6名患者）
+set.seed(42)
+data <- data.frame(
+  id = 1:6,
+  ALT = c(28, 45, 120, 65, 32, 88),
+  AST = c(30, 55, 110, 70, 35, 95),
+  Cr  = c(0.8, 1.1, 1.8, 1.2, 0.9, 1.5)
+)
+
+# 显示原始数据
+print("原始数据：")
+print(data)
+
+# 仅对数值列（第2~4列）进行标准化
+z_scores <- as.data.frame(scale(data[2:4]))
+
+# 合并ID列
+result <- cbind(id = data$id, z_scores)
+
+print("标准化后的z分数：")
+print(result)
+
+# 验证：每列均值应为0，标准差应为1
+print("各列均值（应接近0）：")
+print(colMeans(z_scores))
+
+print("各列标准差（应接近1）：")
+print(apply(z_scores, 2, sd))
+
+运行命令：Rscript zscore_example.R
+
+预期运行结果：
+- 标准化后每列均值为0，标准差为1。
+- ALT的原始值120转换为约1.33，28转换为约-0.91。
+
+测试建议：
+1. 在data中增加一个NA值，观察scale()的输出（会返回NA），尝试用na.omit或mean/ sd手动处理。
+2. 用手动公式 (x-mean(x))/sd(x) 对任意列验证结果一致性。
+
+常见问题或注意事项：
+- scale()返回的是矩阵，使用as.data.frame()转换为数据框更方便。
+- 若后续有新样本加入，必须使用原始数据的均值和标准差进行转换，不能重新计算。
+- 标准化不会改变数据的分布形态，仅改变尺度和位置。

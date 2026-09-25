@@ -1,0 +1,50 @@
+案例问题/题目：使用tapply()按吸烟状态分组，计算肺癌患者生存时间的中位数（含缺失值处理）。
+
+环境依赖：R语言（≥4.0），仅标准库，无需安装第三方包。
+
+完整代码：
+# 设置随机种子保证可重复
+set.seed(42)
+
+# 生成模拟数据集
+n <- 100
+smoke <- factor(sample(c("是", "否"), n, replace=TRUE), levels=c("是", "否"))
+# 生存月数：吸烟组中位数约12个月，非吸烟组约18个月，加噪声
+surv_month <- ifelse(smoke=="是", rnorm(n, mean=12, sd=4), rnorm(n, mean=18, sd=5))
+surv_month <- round(surv_month, 1)
+# 随机引入5个缺失值
+surv_month[sample(1:n, 5)] <- NA
+
+# 查看数据概览
+cat("数据维度：", dim(data.frame(smoke, surv_month)), "\n")
+
+# 核心：tapply 分组计算中位数（含缺失值处理）
+medians <- tapply(surv_month, smoke, median, na.rm=TRUE)
+print("各组中位生存时间（月）：")
+print(medians)
+
+# 额外验证：同时输出各组样本量（不包括缺失值）
+counts <- tapply(surv_month, smoke, function(x) sum(!is.na(x)))
+print("各组有效样本量：")
+print(counts)
+
+运行命令：在R控制台或RStudio中直接运行上述代码。
+
+预期运行结果：
+数据维度： 100 2
+各组中位生存时间（月）：
+    是     否
+11.750 18.200
+各组有效样本量：
+是 否
+49 46
+
+测试建议：
+1. 修改随机种子（如set.seed(123)）验证结果的随机性。
+2. 将吸烟分组改为3个水平，观察tapply自动增加输出行。
+3. 移除na.rm=TRUE参数，观察中位数变为NA，提醒处理缺失值的重要性。
+
+常见问题/注意事项：
+1. tapply返回值为数组，建议用unname()转向量，避免后续绘图或dplyr操作时报错。
+2. 若因子包含空水平，tapply会返回NA，可用default参数或直接剔除空水平。
+3. tapply只能返回单一统计量，若需同时计算中位数和IQR，建议用aggregate()或summary()配合by()。

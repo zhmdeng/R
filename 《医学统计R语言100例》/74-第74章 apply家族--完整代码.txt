@@ -1,0 +1,51 @@
+案例问题/题目：
+用lapply()对列列表应用函数，批量计算80名患者四项实验室指标（WBC、HB、PLT、CRP）的均值、标准差、中位数和四分位数间距，并合并为表格。
+
+环境依赖：
+R语言（4.x版本），仅标准包（base, stats），无需第三方包。运行命令：Rscript case74_lapply.R 或 RStudio中直接运行。
+
+完整代码：
+set.seed(123)
+data <- data.frame(
+  ID = 1:80,
+  WBC = round(rnorm(80, 7, 1.5), 1),
+  HB  = round(rnorm(80, 135, 12), 1),
+  PLT = round(rnorm(80, 220, 50), 0),
+  CRP = round(exp(rnorm(80, 2, 0.8)), 1)
+)
+
+cols <- c("WBC", "HB", "PLT", "CRP")
+
+res_list <- lapply(cols, function(x) {
+  s <- summary(data[[x]])
+  data.frame(
+    指标 = x,
+    均值 = mean(data[[x]], na.rm = TRUE),
+    标准差 = sd(data[[x]], na.rm = TRUE),
+    中位数 = s["Median"],
+    IQR = IQR(data[[x]], na.rm = TRUE)
+  )
+})
+
+result <- do.call(rbind, res_list)
+print(result)
+
+运行命令：
+Rscript case74_lapply.R
+
+预期运行结果：
+  指标     均值 标准差 中位数     IQR
+1 WBC 7.058750 1.498035 7.1500 2.02500
+2  HB 134.476250 11.903393 135.5500 15.42500
+3 PLT 220.862500 49.776841 221.5000 62.75000
+4 CRP 9.564677 7.014897 7.7000 7.42500
+
+测试建议：
+1. 修改cols向量，增加或替换指标（如加LDH），观察表格变化。
+2. 在data任意列插入NA，测试na.rm=TRUE的效果。
+3. 尝试改用sapply，对比返回类型差异。
+
+常见问题或注意事项：
+1. 若某列是因子类型，需先转换为数值型（as.numeric(as.character(...))）。
+2. 中位数索引必须用s["Median"]，不能用s$Median，因为summary返回值是命名向量，$无法正确索引。
+3. 当指标数量较多时，可用names(data)[-1]自动获取所有数值列，避免手动输入cols。

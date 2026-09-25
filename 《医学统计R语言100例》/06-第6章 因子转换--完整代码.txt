@@ -1,0 +1,30 @@
+案例问题/题目：将性别变量（编码1/2）转换为因子，并设置水平为“男”“女”。
+
+环境依赖：R 4.0+；仅标准库（base），无需第三方包。
+
+完整代码：
+gender_raw <- c(1, 2, 1, 1, 2, 2)
+
+gender_fct <- factor(gender_raw,
+                     levels = c(1, 2),
+                     labels = c("男", "女"))
+
+str(gender_fct)
+table(gender_fct)
+
+运行命令：Rscript factor_conversion.R
+
+预期运行结果：
+ Factor w/ 2 levels "男","女": 1 2 1 1 2 2
+gender_fct
+男 女
+ 3  3
+
+测试建议：
+1. 将gender_raw改为c("M","F","M")，用levels=c("M","F")重新转换，不设labels。
+2. 确认table()输出正确，性别频数为2男1女。
+
+常见问题：
+- 若原始值与levels不匹配，factor()会产生NA，请先用unique()检查原始编码。
+- labels与levels必须一一对应，长度不一致会报错。
+- 建模时第一个水平为参考水平，如需修改可用relevel()。

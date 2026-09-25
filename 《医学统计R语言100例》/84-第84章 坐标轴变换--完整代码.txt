@@ -1,0 +1,49 @@
+案例问题/题目：对y轴进行对数变换（scale_y_log10()），绘制病毒载量随时间的下降趋势，解决数值跨度大导致早期变化不可见的问题。
+
+环境依赖：R语言（≥4.0），需安装ggplot2包；运行命令：Rscript 案例84.R 或直接在RStudio中运行。无其他第三方依赖。
+
+完整代码：
+# 案例84：坐标轴对数变换
+library(ggplot2)
+set.seed(42)
+
+# 模拟数据：4个时间点，6名患者
+time <- rep(c(0, 7, 14, 28), each = 6)
+patient <- rep(paste0("P", 1:6), times = 4)
+
+# 指数衰减模拟
+load <- c(rnorm(6, 50000, 5000),
+          rnorm(6, 8000, 800),
+          rnorm(6, 1000, 150),
+          rnorm(6, 80, 20))
+load <- round(abs(load), 0)
+df <- data.frame(patient, time, load)
+
+# 变换前
+p1 <- ggplot(df, aes(time, load, group = patient)) +
+  geom_line() + geom_point() +
+  labs(title = "普通坐标轴")
+
+# 对数变换后
+p2 <- ggplot(df, aes(time, load, group = patient)) +
+  geom_line() + geom_point() +
+  scale_y_log10(breaks = c(10, 100, 1000, 10000, 50000)) +
+  labs(title = "y轴对数变换", y = "病毒载量 (log10)")
+
+# 输出变换后绘图
+print(p2)
+
+# 如需并排对比可取消注释：
+# library(gridExtra)
+# grid.arrange(p1, p2, ncol=2)
+
+运行命令：Rscript 案例84.R
+
+预期运行结果：控制台无报错；弹出图形窗口显示对数刻度y轴，曲线从50000平滑降至20左右，后段波动可辨。
+
+测试建议：尝试将数据中的某个值改为0，观察报错，并测试加常数（如load+1）后的效果；也可将breaks参数改为c(1,10,100,1000)查看刻度变化。
+
+常见问题或注意事项：
+1. scale_y_log10()要求数据全部为正，若含0需先过滤或加常数。
+2. aes()中必须指定group=patient，否则所有点会被错误连接为单条线。
+3. 对数变换后坐标轴标签显示原始数值，但刻度间距表示倍数关系，解读时应说明“变化倍数”而非“变化差值”。

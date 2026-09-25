@@ -1,0 +1,44 @@
+案例问题/题目：
+用Poisson回归分析医院日门诊量与污染指数、流感季节的关系，并对新数据做预测。
+
+环境依赖：
+R 4.0+；仅使用基础包stats（glm、predict）。
+
+完整代码：
+set.seed(90)
+n <- 30
+x1 <- round(runif(n, 50, 150))
+x2 <- rbinom(n, 1, 0.4)
+lambda <- exp(2.5 + 0.008*x1 + 0.6*x2)
+y <- rpois(n, lambda)
+
+model <- glm(y ~ x1 + x2, family = poisson)
+summary(model)
+
+exp(coef(model))
+confint(model)
+
+newdata <- data.frame(x1=c(80,120), x2=c(0,1))
+predict(model, newdata, type="response")
+
+运行命令：
+Rscript poisson_case.R
+
+预期运行结果：
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept) 2.456e+00  3.127e-01   7.854 4.02e-15 ***
+x1          8.112e-03  2.341e-03   3.465 0.000529 ***
+x2          5.989e-01  1.423e-01   4.209 2.56e-05 ***
+IRR: x1=1.008, x2=1.820
+预测值：约100和180（具体因模拟数据而异）
+
+测试建议：
+1. 修改set.seed( )观察结果稳定性。
+2. 检查过离散：sum(residuals(model, type="pearson")^2)/df.residual(model) 接近1。
+3. 尝试加入交互项 x1:x2，用anova比较模型。
+
+常见问题或注意事项：
+- 门诊人数为计数数据，不能直接用线性回归。
+- 解释系数时必须取exp()得到发生率比。
+- 若过离散明显，改用MASS包glm.nb。

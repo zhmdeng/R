@@ -1,0 +1,58 @@
+案例问题/题目：
+第27章：三组小鼠体重比较——用TukeyHSD进行事后多重比较。24只小鼠随机分为对照组、低剂量组和高剂量组（每组8只），比较给药后体重增加量。若单因素方差分析显著，则用TukeyHSD找出哪些组间存在差异。
+
+环境依赖：
+- 语言：R（版本≥4.0）
+- 依赖包：仅标准R基础包（stats、graphics），无第三方包
+- 运行命令：Rscript chapter27_tukeyhsd.R 或 在R交互环境逐行运行
+
+完整代码：
+```r
+# chapter27_tukeyhsd.R
+# 生成模拟数据（三组各8个观测）
+set.seed(42)
+group <- factor(rep(c("Control", "Low", "High"), each = 8))
+weight_gain <- c(rnorm(8, mean = 12, sd = 2),
+                 rnorm(8, mean = 15, sd = 2),
+                 rnorm(8, mean = 18, sd = 2))
+data <- data.frame(group, weight_gain)
+
+# 单因素方差分析
+fit <- aov(weight_gain ~ group, data = data)
+cat("===== ANOVA Summary =====\n")
+print(summary(fit))
+
+# 仅当ANOVA显著时进行TukeyHSD
+if (summary(fit)[[1]][["Pr(>F)"]][1] < 0.05) {
+  cat("\n===== TukeyHSD Post-hoc Test =====\n")
+  tukey_result <- TukeyHSD(fit)
+  print(tukey_result)
+  
+  # 可视化
+  plot(tukey_result, las = 1)
+} else {
+  cat("\nANOVA不显著，不进行事后多重比较。\n")
+}
+```
+
+运行命令：
+在终端执行：Rscript chapter27_tukeyhsd.R
+
+预期运行结果：
+- ANOVA的F检验p值远小于0.05（约1e-6量级），表明三组间体重增加量存在显著差异。
+- TukeyHSD输出三组比较：
+  - Low-Control: diff约2.8~3.2，p<0.05，显著
+  - High-Control: diff约5.5~6.5，p<0.001，显著
+  - High-Low: diff约2.5~3.5，p通常在0.01~0.05之间，本例中显著
+- 绘图窗口显示三组置信区间，High-Control区间的置信区间离0最远。
+
+测试建议：
+1. 将set.seed(42)改为其他种子（如123），确认结论方向不变。
+2. 将High组均值改为14（与Low组更接近），观察TukeyHSD中High-Low的p值变化，检验方法的灵敏度。
+3. 将High组sd改为5（方差不齐），运行代码观察ANOVA与Tukey结果，思考是否需要用oneway.test()替代。
+
+常见问题/注意事项：
+1. 必须先运行ANOVA，只有整体显著（p<0.05）才做TukeyHSD，避免多重比较的“数据窥探”问题。
+2. TukeyHSD假设各组方差齐性，方差差异大时结果偏差，应改用Games-Howell检验（需额外包）。
+3. 结果解读看“p adj”列，即调整后p值，不使用原始t检验p值。
+4. 样本量不同时TukeyHSD仍可用，但各组样本量差距过大时推荐使用HSD的改进版或nparcomp包。

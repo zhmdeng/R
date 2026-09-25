@@ -1,0 +1,70 @@
+案例问题/题目：
+对2x2小样本列联表（总样本量25，含0单元格）进行Fisher精确检验，比较用药组与安慰剂组不良反应发生率差异。数据：用药组发生2例、未发生12例；安慰剂组发生0例、未发生11例。检验单侧假设（用药组风险更高）。
+
+环境依赖：
+R语言 ≥ 4.0.0，仅标准库（stats包内含fisher.test），无需第三方包。运行命令：Rscript fisher_exact.R
+
+完整代码：
+# fisher_exact.R
+# 构建2x2列联表
+tab <- matrix(c(2, 12,
+                0, 11),
+              nrow = 2, byrow = TRUE,
+              dimnames = list(Group = c("Drug", "Placebo"),
+                              Outcome = c("Yes", "No")))
+print("列联表：")
+print(tab)
+
+# Fisher精确检验（单侧）
+fit <- fisher.test(tab, alternative = "greater")
+print("Fisher精确检验结果：")
+print(fit)
+
+# 提取关键指标
+cat("P-value (one-sided):", fit$p.value, "\n")
+cat("Odds ratio:", fit$estimate, "\n")
+cat("95% CI lower bound:", fit$conf.int[1], "\n")
+cat("95% CI upper bound:", fit$conf.int[2], "\n")
+
+# 附加：若需双侧检验
+fit2 <- fisher.test(tab, alternative = "two.sided")
+cat("P-value (two-sided):", fit2$p.value, "\n")
+
+运行命令：
+Rscript fisher_exact.R
+
+预期运行结果：
+[1] "列联表："
+        Outcome
+Group    Yes No
+  Drug     2 12
+  Placebo  0 11
+[1] "Fisher精确检验结果："
+
+	Fisher's Exact Test for Count Data
+
+data:  tab
+p-value = 0.4863
+alternative hypothesis: true odds ratio is greater than 1
+95 percent confidence interval:
+ 0.2071778       Inf
+sample estimates:
+odds ratio 
+       Inf 
+
+P-value (one-sided): 0.4863 
+Odds ratio: Inf 
+95% CI lower bound: 0.2071778 
+95% CI upper bound: Inf 
+P-value (two-sided): 0.4863
+
+测试建议：
+1. 修改tab中数字如将(2,12)改为(5,9)，观察P值变化。
+2. 尝试alternative="less"或"two.sided"比较结果。
+3. 若担心边际不固定，可尝试fisher.test(tab, hybrid=TRUE)（需包）或直接描述精确P值。
+
+常见问题或注意事项：
+- 单元格为0时OR为Inf/0，属正常现象，应报告P值和置信区间而非OR点估计。
+- 单侧检验需在试验设计时预先声明方向，避免事后偏倚。
+- 当总样本量较大（>1000）时，fisher.test计算可能稍慢，但通常可接受。
+- 本方法基于超几何分布，要求行列边际固定；若实际研究为队列或病例对照设计，该假设通常近似成立。

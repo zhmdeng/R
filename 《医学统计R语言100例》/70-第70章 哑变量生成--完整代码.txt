@@ -1,0 +1,37 @@
+案例问题/题目：
+将多分类变量（血型：A/B/AB/O）转换为哑变量，以O为参照组，生成可用于回归分析的哑变量矩阵。
+
+环境依赖：
+R >= 4.0，仅标准库（base/stats），无需第三方包。
+
+完整代码：
+set.seed(123)
+blood <- factor(sample(c("A","B","AB","O"), 200, replace=TRUE),
+                levels = c("O","A","B","AB"))
+dm <- model.matrix(~ blood)
+print(head(dm, 5))
+cat("\n对比编码方式：\n")
+print(contrasts(blood))
+cat("\n哑变量行和（验证）：\n")
+print(rowSums(dm[, -1]))
+
+运行命令：
+Rscript chapter70_dummy.R
+
+预期运行结果：
+前5行显示截距及bloodA、bloodB、bloodAB列。例如：
+(Intercept) bloodA bloodB bloodAB
+1           1      0      0      1
+2           1      0      1      0
+3           1      1      0      0
+4           1      0      0      0
+5           1      0      1      0
+对比编码显示各水平与参照O的比较。行和均为0或1。
+
+测试建议：
+1. 修改levels顺序，观察参照组变化；2. 使用as.data.frame(dm)转为数据框后合并到原数据。
+
+常见问题：
+Q: 为什么只有3个哑变量而非4个？
+A: 4个水平需要3个哑变量即可完整编码，第4个水平（参照组）由全0表示，避免多重共线性。
+注意：若需生成全部k个哑变量（如用于特定矩阵运算），可用model.matrix(~ blood - 1)生成无截距的完整编码，但回归分析中不应直接使用。

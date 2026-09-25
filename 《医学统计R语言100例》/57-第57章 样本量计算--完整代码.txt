@@ -1,0 +1,64 @@
+案例问题/题目：
+用pwr包估算独立样本t检验所需样本量。预期效应量Cohen's d=0.5，α=0.05（双侧），检验效能1-β=0.80，两组等样本量。求每组n，并绘制样本量-效能曲线。
+
+环境依赖：
+R语言（≥4.0），需安装第三方包pwr（install.packages("pwr")）。运行命令：Rscript case57.R
+
+完整代码：
+# 案例57：样本量计算（pwr包t检验）
+library(pwr)
+
+# 1. 基础估算
+res <- pwr.t.test(d = 0.5, sig.level = 0.05, power = 0.80,
+                  type = "two.sample", alternative = "two.sided")
+print(res)
+n_per_group <- ceiling(res$n)
+cat("每组所需样本量（向上取整）：", n_per_group, "\n")
+cat("两组总样本量：", 2 * n_per_group, "\n")
+
+# 2. 样本量-效能曲线
+powers <- seq(0.5, 0.95, by = 0.05)
+ns <- sapply(powers, function(p) {
+  ceiling(pwr.t.test(d = 0.5, sig.level = 0.05, power = p,
+                     type = "two.sample")$n)
+})
+plot(powers, ns, type = "b", pch = 19, col = "steelblue",
+     xlab = "检验效能 (1-β)", ylab = "每组所需样本量",
+     main = "样本量随检验效能变化趋势")
+abline(h = n_per_group, lty = 2, col = "red")
+
+# 3. 打印小表格供核对
+cat("\n效能水平与对应每组样本量：\n")
+print(data.frame(power = powers, n_per_group = ns))
+
+运行命令：
+Rscript case57.R
+
+预期运行结果：
+Two-sample t test power calculation
+              n = 63.76561
+              d = 0.5
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+每组所需样本量（向上取整）：64
+两组总样本量：128
+效能水平与对应每组样本量：
+   power n_per_group
+1   0.50          39
+2   0.55          43
+3   0.60          47
+4   0.65          51
+5   0.70          56
+6   0.75          60
+7   0.80          64
+8   0.85          71
+9   0.90          79
+10  0.95          93
+同时弹出样本量-效能曲线图，红色虚线对应80%效能、每组64例。
+
+测试建议：
+修改d为0.2或0.8，观察样本量变化；修改power为0.9，验证n增大；改用type="paired"比较配对设计所需样本量更小。
+
+常见问题或注意事项：
+1. pwr.t.test返回的n为每组样本量，可直接取整，但实际工作中建议适当增加10%以应对失访。2. 若试验设计为两组不等样本量，应使用pwr.t2n.test()。3. 效应量d的计算公式为(μ1-μ2)/σ，σ为合并标准差，需提前从预试验或文献获取。

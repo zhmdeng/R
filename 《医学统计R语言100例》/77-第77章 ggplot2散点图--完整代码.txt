@@ -1,0 +1,40 @@
+案例问题/题目：用ggplot2绘制带回归线的散点图，探索体重与收缩压的线性关系，并按性别分组。
+
+环境依赖：
+- R语言 ≥ 4.0
+- 需安装ggplot2包（install.packages("ggplot2")）
+- 无其他第三方依赖
+
+完整代码：
+library(ggplot2)
+set.seed(123)
+n <- 50
+sex <- rep(c("男", "女"), each = 25)
+weight <- c(rnorm(25, 70, 10), rnorm(25, 65, 8))
+sbp <- 60 + 0.8 * weight + ifelse(sex == "男", 5, 0) + rnorm(n, 0, 8)
+dat <- data.frame(sex, weight, sbp)
+
+p <- ggplot(dat, aes(x = weight, y = sbp, color = sex)) +
+  geom_point(size = 2.5, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, level = 0.95, linewidth = 1) +
+  labs(title = "体重与收缩压的关系（含回归线）",
+       x = "体重（kg）", y = "收缩压（mmHg）",
+       color = "性别") +
+  theme_bw(base_size = 14)
+print(p)
+
+运行命令：
+在RStudio中执行上述代码，或保存为scatter_lm.R后运行 source("scatter_lm.R")
+
+预期运行结果：
+图形窗口显示两组（男=蓝，女=红）散点，各有上升的回归线，置信带为浅灰色。整体趋势：体重越大，血压越高，男性整体略高于女性。
+
+测试建议：
+1. 修改set.seed值，观察数据波动对回归线斜率的影响。
+2. 将geom_smooth中se改为FALSE，对比置信区间去掉后的效果。
+3. 用ggsave("scatter.png", width=6, height=4)保存图片，核查分辨率。
+
+常见问题或注意事项：
+- 若报错“unused argument linewidth”，请升级ggplot2到3.4以上，或将linewidth改为size。
+- 数据若存在缺失值，回归线会中断，需先处理缺失。
+- 本数据为模拟，不能替代真实临床研究结论。

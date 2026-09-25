@@ -1,0 +1,39 @@
+案例问题/题目：
+多元线性回归：用lm()纳入年龄、性别等多个预测变量。研究收缩压（SBP）与年龄、性别（0=男，1=女）、BMI的关系，基于30例模拟数据建立模型。
+
+环境依赖：
+R版本≥4.0，仅需标准库（stats），无需第三方包。运行命令：Rscript 40_multiple_linear_regression.R
+
+完整代码：
+set.seed(42)
+n <- 30
+年龄 <- rnorm(n, 55, 10)
+性别 <- rbinom(n, 1, 0.5)
+BMI <- rnorm(n, 24, 3)
+SBP <- 80 + 0.8*年龄 + 5*性别 + 0.6*BMI + rnorm(n, 0, 8)
+dat <- data.frame(SBP, 年龄, 性别, BMI)
+
+model <- lm(SBP ~ 年龄 + 性别 + BMI, data = dat)
+summary(model)
+cat("\n--- 回归系数95%CI ---\n")
+confint(model)
+cat("\n--- 方差分析表 ---\n")
+anova(model)
+
+运行命令：
+Rscript 40_multiple_linear_regression.R
+
+预期运行结果：
+- 模型整体F检验P<0.05，R²约0.85。
+- 年龄系数约0.8，P<0.001；性别系数约5.0，P约0.01~0.05；BMI系数约0.6，P约0.05~0.2。
+- confint不含0提示该变量显著。
+
+测试建议：
+1. 修改set.seed(1)或其他数值，观察系数波动。
+2. 将性别转换为因子factor(性别)，查看水平标签变化。
+3. 增加交互项：lm(SBP~年龄*性别+BMI)，对比AIC。
+
+常见问题或注意事项：
+- 若R²很高但个别变量不显著，可能存在共线性，用car::vif()检查。
+- 模拟数据中性别B系数较小，样本量小时可能不显著，属正常。
+- 本模型未做残差诊断，实际应用需plot(model)检查正态性与方差齐性。

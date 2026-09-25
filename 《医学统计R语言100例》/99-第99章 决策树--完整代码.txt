@@ -1,0 +1,37 @@
+案例问题/题目：
+使用rpart包构建iris数据集的分类决策树，绘制树形图并评估模型性能。
+
+环境依赖：
+R语言（版本≥3.6），需安装rpart（基础包自带）和rpart.plot包。
+安装命令：install.packages(c("rpart", "rpart.plot"))
+运行命令：Rscript 99_decision_tree.R
+
+完整代码：
+library(rpart)
+library(rpart.plot)
+set.seed(42)
+idx <- sample(1:nrow(iris), 0.7*nrow(iris))
+train <- iris[idx, ]
+test  <- iris[-idx, ]
+model <- rpart(Species ~ ., data = train, method = "class")
+pred  <- predict(model, test, type = "class")
+conf  <- table(test$Species, pred)
+print(conf)
+acc   <- sum(diag(conf)) / sum(conf)
+cat("准确率:", round(acc, 3), "\n")
+rpart.plot(model, type = 2, extra = 104,
+           box.palette = "BuGn", fallen.leaves = TRUE)
+
+预期运行结果：
+混淆矩阵显示三类品种预测基本正确，准确率一般在0.9左右。
+图形中根节点按Petal.Length < 2.45分裂，左侧为setosa，右侧再按Petal.Width分裂出versicolor与virginica。
+
+测试建议：
+1. 修改set.seed值，观察不同划分下的准确率变化。
+2. 尝试rpart.control(minsplit=5, cp=0.01)调整参数，看树结构与准确率差异。
+3. 用printcp(model)查看复杂度参数，用prune()进行剪枝。
+
+常见问题：
+1. 未安装rpart.plot时提示"找不到函数rpart.plot"，需先安装包。
+2. 图形中文标签乱码时可改用英文标签或调整字体参数。
+3. 数据量较小时，70%/30%划分可能偶然产生偏差，建议配合交叉验证。

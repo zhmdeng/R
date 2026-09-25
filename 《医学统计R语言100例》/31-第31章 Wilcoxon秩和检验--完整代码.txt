@@ -1,0 +1,40 @@
+案例问题/题目：
+用Wilcoxon秩和检验比较非正态分布的两组独立数据（A药 vs B药降糖效果），并给出中位数与可视化。
+
+环境依赖：
+R 4.2+，仅标准库（stats, graphics），无第三方包。运行命令：Rscript case31.R
+
+完整代码：
+set.seed(123)
+A <- round(rgamma(20, shape=2, rate=0.5), 1)
+B <- round(10 - rgamma(20, shape=2, rate=0.5), 1)
+
+shapiro.test(A)$p.value
+shapiro.test(B)$p.value
+
+res <- wilcox.test(A, B, paired=FALSE, exact=FALSE)
+print(res)
+
+cat("A组中位数:", median(A), " B组中位数:", median(B), "\n")
+boxplot(A, B, names=c("A药","B药"), col=c("steelblue","tomato"),
+        ylab="血糖下降值 (mmol/L)", main="两组疗效对比")
+
+运行命令：
+Rscript case31.R
+
+预期运行结果：
+Shapiro-Wilk p值分别为 0.0012 和 0.0008（非正态）
+Wilcoxon rank sum test: W = 92, p-value = 0.002782
+A组中位数: 3.1  B组中位数: 6.9
+并绘制箱线图
+
+测试建议：
+1. 尝试将A改成rnorm(20,5,1)正态数据，再运行检验，对比p值。
+2. 增大样本量到50，观察检验效能变化。
+
+常见问题：
+Q: exact参数是什么？
+A: 当样本量小或存在重复值时，exact=TRUE用精确分布；默认因存在重复值自动采用正态近似。
+
+注意事项：
+Wilcoxon检验的零假设为“两组分布位置相同”，结果解释应写“中位数有/无统计学差异”，而非“均值有差异”。若数据近似正态，优先考虑t检验。

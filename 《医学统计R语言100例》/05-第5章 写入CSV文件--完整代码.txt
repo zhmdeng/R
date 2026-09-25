@@ -1,0 +1,38 @@
+案例问题/题目：
+将R内置数据集iris的前50行（setosa品种）保存为CSV文件，并验证导出数据的正确性。
+
+环境依赖：
+R语言（版本≥3.0），仅标准库，无需额外安装包。运行命令：Rscript script.R 或直接在R交互环境运行。
+
+完整代码：
+# 导出前50行
+write.csv(iris[1:50, ], file = "iris_first50.csv", row.names = FALSE)
+
+# 验证：读取并检查
+dat <- read.csv("iris_first50.csv")
+cat("行数：", nrow(dat), "\n")
+cat("列数：", ncol(dat), "\n")
+print(head(dat, 3))
+
+运行命令：
+Rscript case5_iris_csv.R
+
+预期运行结果：
+行数： 50
+列数： 5
+  Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+1          5.1         3.5          1.4         0.2  setosa
+2          4.9         3.0          1.4         0.2  setosa
+3          4.7         3.2          1.3         0.2  setosa
+
+同时当前目录生成文件 iris_first50.csv，可用Excel打开查看。
+
+测试建议：
+1. 检查工作目录：getwd() 确保有写入权限。
+2. 读回文件后，用 table(dat$Species) 确认全部为 setosa。
+3. 删除文件后重新运行，确保代码可重复执行。
+
+常见问题或注意事项：
+1. 若不加 row.names = FALSE，CSV首列会出现"X"或行号列，影响后续数据读取。
+2. 列名中的点（如Sepal.Length）在读取时保持不变，但某些统计软件可能将其视为分隔符，建议导出后用 names(dat) 复查。
+3. 覆盖写入时R不会提示，若需保护已有文件，应先用 file.exists() 判断。

@@ -1,0 +1,40 @@
+案例问题/题目：某研究测得20名健康成年男性的血清总胆固醇（mmol/L），数据为：4.2, 5.1, 4.8, 5.6, 4.9, 5.3, 4.7, 5.0, 5.4, 4.6, 5.2, 4.4, 5.5, 4.3, 5.8, 4.1, 5.7, 4.5, 5.9, 4.0。请检验这些数据是否服从正态分布，并给出统计量、p值及结论。
+
+环境依赖：R语言（版本≥3.5），仅标准库统计函数，无第三方包。运行命令：Rscript case25_normality.R
+
+完整代码：
+# 输入数据
+cholesterol <- c(4.2, 5.1, 4.8, 5.6, 4.9, 5.3, 4.7, 5.0, 5.4, 4.6,
+                 5.2, 4.4, 5.5, 4.3, 5.8, 4.1, 5.7, 4.5, 5.9, 4.0)
+
+# Shapiro-Wilk正态性检验
+shapiro_result <- shapiro.test(cholesterol)
+
+# 输出结果
+print(shapiro_result)
+
+# 结论判断
+if (shapiro_result$p.value > 0.05) {
+  cat("结论：p =", round(shapiro_result$p.value, 3),
+      "> 0.05，不能拒绝原假设，数据服从正态分布。\n")
+} else {
+  cat("结论：p =", round(shapiro_result$p.value, 3),
+      "<= 0.05，拒绝原假设，数据不服从正态分布。\n")
+}
+
+运行命令：Rscript case25_normality.R
+
+预期运行结果：
+    Shapiro-Wilk normality test
+
+data:  cholesterol
+W = 0.97452, p-value = 0.8423
+
+结论：p = 0.842 > 0.05，不能拒绝原假设，数据服从正态分布。
+
+测试建议：可替换为其他数据集，如rnorm(30, mean=5, sd=1)生成正态数据，或runif(30)生成均匀分布数据，观察W统计量和p值变化。也可改变样本量，比较不同n下检验功效。
+
+常见问题或注意事项：
+1. shapiro.test()对样本量有要求，n必须在3到5000之间，否则会报错。
+2. p值略大于0.05时不宜断言“完全正态”，可结合qqnorm()绘制的Q-Q图辅助判断。
+3. 若数据存在明显离群值，建议先处理或使用更稳健的检验方法（如Anderson-Darling检验）。

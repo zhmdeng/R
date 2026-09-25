@@ -1,0 +1,66 @@
+案例问题/题目：
+利用prop.table()将二维频数表转换为总体百分比、行百分比和列百分比，以医院科室满意度数据为例。
+
+环境依赖：
+R 4.0+；仅标准库，无需安装第三方包。运行命令：Rscript ch16_prop_table.R
+
+完整代码：
+set.seed(42)
+dept <- rep(c("内科", "外科", "儿科"), each = 40)
+satisfaction <- sample(c("满意", "不满意"), 120, replace = TRUE, prob = c(0.7, 0.3))
+
+freq_tab <- table(科室 = dept, 满意 = satisfaction)
+print("频数表：")
+print(freq_tab)
+
+p_overall <- prop.table(freq_tab)
+cat("\n总体百分比：\n")
+print(round(p_overall * 100, 2))
+
+p_row <- prop.table(freq_tab, margin = 1)
+cat("\n行百分比（%）：\n")
+print(round(p_row * 100, 2))
+
+p_col <- prop.table(freq_tab, margin = 2)
+cat("\n列百分比（%）：\n")
+print(round(p_col * 100, 2))
+
+运行命令：
+Rscript ch16_prop_table.R
+
+预期运行结果：
+频数表：
+         满意
+科室      不满意 满意
+  内科      11   29
+  外科      13   27
+  儿科      15   25
+
+总体百分比：
+         满意
+科室       不满意  满意
+  内科     9.17 24.17
+  外科    10.83 22.50
+  儿科    12.50 20.83
+
+行百分比（%）：
+         满意
+科室       不满意  满意
+  内科    27.50 72.50
+  外科    32.50 67.50
+  儿科    37.50 62.50
+
+列百分比（%）：
+         满意
+科室       不满意  满意
+  内科    28.21 35.80
+  外科    33.33 33.33
+  儿科    38.46 30.86
+
+测试建议：
+将数据换成真实计数表，检查行和列百分比是否分别合计为100；可增加维度验证三维表的margin参数行为。
+
+常见问题或注意事项：
+1. prop.table返回的是比例（0-1），若需百分比须乘以100。
+2. margin参数不能写错：1=行方向，2=列方向，0或NULL=全体。
+3. 若表中有边缘合计行或列，请先去除再计算，否则结果失真。

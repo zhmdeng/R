@@ -1,0 +1,44 @@
+案例问题/题目：使用ggplot2修改图形的标题、轴标签和主题，生成适用于医学论文的自定义散点图。
+
+环境依赖：R 4.0+，需安装ggplot2包（install.packages("ggplot2")）。
+
+完整代码：
+library(ggplot2)
+
+# 基础散点图
+p <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point(size = 3, alpha = 0.7)
+
+# 添加标签与主题
+p + labs(
+    title = "鸢尾花萼片长度与宽度关系",
+    subtitle = "数据集：iris（n=150）",
+    x = "花萼长度 (cm)",
+    y = "花萼宽度 (cm)",
+    color = "品种"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 18),
+    plot.subtitle = element_text(hjust = 0.5, size = 12, color = "gray40"),
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  )
+
+# 保存图片（可选）
+# ggsave("plot_custom.png", width = 7, height = 5)
+
+运行命令：Rscript script.R 或 RStudio中直接运行
+
+预期运行结果：生成一张散点图，标题居中加粗，副标题位于标题下方，图例在底部，背景白色仅显示主要网格线。
+
+测试建议：
+1. 将theme_minimal()改为theme_classic()，观察背景和网格变化。
+2. 修改legend.position为"top"或"none"，检查图例位置。
+3. 在labs()中增加caption="来源：R内置数据集"，查看页脚效果。
+
+常见问题与注意事项：
+1. aes()映射必须存在，否则颜色等不会按分组区分。
+2. theme()中元素名称易拼错，如axis.title.x不要写成axis.title。
+3. 若出现字体显示问题，可尝试在theme()中设置family="sans"或"serif"。
+4. 本案例仅使用内置数据，无需额外数据清洗，便于独立验证。

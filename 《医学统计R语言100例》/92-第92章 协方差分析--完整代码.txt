@@ -1,0 +1,43 @@
+案例问题/题目：两种降压药疗效比较，需校正基线血压差异（ANCOVA）。
+
+环境依赖：R 4.0+，需安装emmeans包（若未安装，运行install.packages("emmeans"））。仅标准R也可运行但无法输出校正均值。
+
+完整代码：
+# 模拟数据
+set.seed(123)
+n <- 50
+drug <- rep(c("A", "B"), each = 25)
+baseline <- c(rnorm(25, 160, 10), rnorm(25, 150, 10))
+reduction <- -5 + ifelse(drug=="A", 8, 12) + 
+             0.3*(baseline - 155) + rnorm(n, 0, 3)
+data <- data.frame(drug=factor(drug), baseline, reduction)
+
+# 1) 斜率齐性检验（交互项）
+m1 <- aov(reduction ~ drug * baseline, data = data)
+summary(m1)
+
+# 2) 若交互不显著，拟合ANCOVA
+m2 <- aov(reduction ~ drug + baseline, data = data)
+summary(m2)
+
+# 3) 输出校正后组间均数（需emmeans包）
+library(emmeans)
+emmeans(m2, ~ drug, cov.reduce = mean)
+
+运行命令：source("ancova_case.R") 或直接在RStudio中运行。
+
+预期运行结果：
+- 交互项P值>0.05（约0.85），斜率齐性成立
+- 药物主效应P<0.001
+- B药校正后降幅约10.2 mmHg，A药约6.1 mmHg，差约4.1 mmHg
+
+测试建议：
+- 改变种子或样本量，看结论稳定性
+- 用car::Anova(m2, type="III")对比结果
+- 绘图：plot(data$baseline, data$reduction, col=data$drug) + abline() 观察平行性
+
+常见问题或注意事项：
+- 若交互显著，不能直接读主效应，应分析简单效应或分组回归
+- 协变量需为数值型连续变量，且与处理无关
+- 检查残差正态性和方差齐性（plot(m2)）
+- 若无emmeans包，可用predict(m2, newdata=data.frame(drug=c("A","B"), baseline=mean(data$baseline)))计算校正均值

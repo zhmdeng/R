@@ -1,0 +1,57 @@
+案例问题/题目：
+利用ez包完成混合设计重复测量ANOVA，分析药物（A/B/C）和时间（用药前、4周、8周）对收缩压的影响，并检验交互作用。
+
+环境依赖：
+R >= 4.0，需安装ez包（install.packages("ez")）。运行命令：Rscript case93_rm_anova.R
+
+完整代码：
+# 案例93：重复测量ANOVA（ez包）
+# 安装并加载ez包
+# install.packages("ez")
+library(ez)
+
+# 模拟数据：12名患者，3药物组，每组4人，3个时间点
+set.seed(123)
+dat <- data.frame(
+  id = rep(1:12, each = 3),
+  drug = rep(rep(c("A","B","C"), each = 4), each = 3),
+  time = rep(c("time0","time1","time2"), times = 12),
+  sbp = c(rnorm(12, 150, 8), rnorm(12, 145, 8), rnorm(12, 138, 8))
+)
+
+# 转换时间变量为因子，并设定水平顺序
+dat$time <- factor(dat$time, levels = c("time0","time1","time2"))
+dat$drug <- factor(dat$drug)
+
+# 执行重复测量ANOVA
+res <- ezANOVA(
+  data = dat,
+  dv = sbp,          # 因变量
+  wid = id,          # 受试者ID
+  within = time,     # 组内因素
+  between = drug,    # 组间因素
+  detailed = TRUE,   # 输出详细结果
+  type = 3           # III型平方和
+)
+
+# 打印结果
+print(res)
+
+运行命令：
+在R终端或命令行中执行：Rscript case93_rm_anova.R
+
+预期运行结果：
+输出包含：
+1. Mauchly's Test for Sphericity：显示时间变量的球形检验p值（>0.05则符合球形假设）。
+2. ANOVA Table：包含drug（组间）、time（组内）、drug:time（交互）的F值、p值等。
+模拟数据下，通常drug主效应显著、time主效应显著，drug:time交互可能不显著（p>0.05）。
+
+测试建议：
+将不同组的均值差加大（如A:150, B:140, C:130），再运行代码，观察drug的p值变小，明确组间差异。也尝试将time的均值变化拉大（如time0:150, time1:140, time2:130），检验时间效应显著性。
+
+常见问题或注意事项：
+1. wid变量必须唯一标识受试者，不能有重复或缺失。
+2. 因子水平顺序影响结果解读，务必用levels显式设定。
+3. 若球形检验p<0.05，应依据"p[GG]"或"p[HF]"校正后的p值。
+4. 交互作用显著时，需进一步做简单效应分析（split by drug）。
+5. 数据必须是长格式，每行一个时间点的观测。

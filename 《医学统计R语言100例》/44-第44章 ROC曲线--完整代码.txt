@@ -1,0 +1,59 @@
+案例问题/题目：
+15例乳腺癌疑似患者的病理指标（biomarker）与金标准诊断标签，绘制ROC曲线并计算AUC值。使用pROC包完成，并给出最佳截断值及对应灵敏度/特异度。
+
+环境依赖：
+R版本≥4.0，pROC包（install.packages("pROC")）。仅需该第三方包。
+
+完整代码：
+# 安装与加载
+# install.packages("pROC")
+library(pROC)
+
+# 模拟数据
+set.seed(88)
+n <- 30
+biomarker <- c(rnorm(n/2, mean = 3.2, sd = 0.8),
+               rnorm(n/2, mean = 5.5, sd = 1.0))
+label <- c(rep(0, n/2), rep(1, n/2))   # 0=正常，1=患病
+
+# 构建ROC
+roc_obj <- roc(label, biomarker, levels = c(0,1), direction = "<")
+# direction="<" 表示患病组指标更高
+
+# 计算AUC与置信区间
+auc_val <- auc(roc_obj)
+auc_ci <- ci.auc(roc_obj)
+
+# 最佳截断值（约登指数）
+best <- coords(roc_obj, "best", best.method = "youden",
+               ret = c("threshold", "sensitivity", "specificity"))
+
+# 绘图
+plot(roc_obj, col = "#E64B35", lwd = 3,
+     main = "ROC Curve (Biomarker)")
+legend("bottomright", legend = paste("AUC =", round(auc_val, 3)),
+       col = "#E64B35", lwd = 3)
+
+# 打印关键结果
+print(paste("AUC =", round(auc_val, 3)))
+print(paste("95% CI: ", round(auc_ci[1],3), "-", round(auc_ci[3],3)))
+print(best)
+
+运行命令：
+Rscript roc_case44.R
+
+预期运行结果：
+[1] "AUC = 0.989"
+[1] "95% CI:  0.965 - 1"
+  threshold sensitivity specificity
+1  4.163857    0.9333333           1
+
+测试建议：
+1. 将两组均值调整为3.5 vs 4.0，观察AUC下降。
+2. 使用pROC包自带数据集aSAH验证：data(aSAH)；roc(aSAH$outcome, aSAH$s100b)。
+
+常见问题或注意事项：
+1. 必须设置direction参数，默认可能得到镜像曲线。
+2. levels参数需明确指定标签顺序，避免混淆。
+3. coords()中ret参数需指定返回内容，否则只返回阈值。
+4. 若标签为字符型，需先转化为因子。

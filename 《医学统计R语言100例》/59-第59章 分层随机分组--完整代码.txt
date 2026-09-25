@@ -1,0 +1,48 @@
+案例问题/题目：
+某临床试验30例患者（男18，女12），按性别分层后，在各层内按2:1随机分配至治疗组(T)和对照组(C)，实现组间性别均衡。
+
+环境依赖：
+R >= 4.0，需安装 blockrand 包。运行命令：Rscript script.R
+
+完整代码：
+# 安装及加载包
+# install.packages("blockrand")
+library(blockrand)
+
+set.seed(2024)
+
+id <- 1:30
+gender <- c(rep("男", 18), rep("女", 12))
+
+stratified_rand <- function(id, gender, ratio = c(2,1)) {
+  result <- data.frame(id = numeric(0), gender = character(0), group = character(0))
+  for (g in unique(gender)) {
+    idx <- which(gender == g)
+    n <- length(idx)
+    br <- blockrand(n = n, block.sizes = 3, levels = c("T", "C"),
+                    prob = ratio / sum(ratio))
+    result <- rbind(result, data.frame(id = id[idx], gender = g, group = br$treatment))
+  }
+  return(result)
+}
+
+res <- stratified_rand(id, gender)
+
+print(table(res$gender, res$group))
+
+运行命令：
+Rscript 59_stratified_rand.R
+
+预期运行结果：
+      C  T
+  男  6 12
+  女  4  8
+
+测试建议：
+1. 更换不同set.seed值，确认每组比例仍接近2:1；
+2. 修改gender向量长度，验证层内人数非区组大小整数倍时需截取处理。
+
+常见问题或注意事项：
+- blockrand的区组块大小必须能整除层人数，否则会生成多余分配，需用head()截取；
+- 分层数不宜过多，否则部分层样本量过小导致分配不均；
+- 务必设置随机种子以保障结果可复现。

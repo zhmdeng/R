@@ -1,0 +1,49 @@
+案例问题/题目：使用survfit()绘制Kaplan-Meier生存曲线，比较两组生存差异，并做log-rank检验。
+
+环境依赖：R 4.0+，需安装survival包（install.packages("survival")），无其他第三方依赖。
+
+完整代码：
+# 安装并加载生存分析包
+install.packages("survival")
+library(survival)
+
+# 模拟数据：治疗组25例，对照组25例，生存时间服从不同指数分布
+set.seed(123)
+n <- 25
+time <- c(rexp(n, rate=0.1), rexp(n, rate=0.2))
+group <- factor(rep(c("治疗组", "对照组"), each=n))
+event <- rbinom(2*n, size=1, prob=0.8)
+
+# 构建生存对象并拟合KM曲线
+fit <- survfit(Surv(time, event) ~ group, data=data.frame(time, event, group))
+
+# 绘制基本生存曲线
+plot(fit, col=c("blue", "red"), lwd=2, xlab="生存时间(月)", ylab="生存概率",
+     main="Kaplan-Meier生存曲线")
+legend("topright", legend=c("治疗组", "对照组"), col=c("blue", "red"), lwd=2)
+
+# Log-rank检验比较两组的生存分布差异
+survdiff(Surv(time, event) ~ group, data=data.frame(time, event, group))
+
+# 查看更详细的生存表（含中位生存时间）
+summary(fit)
+
+运行命令：
+Rscript km_curve.R
+
+预期运行结果：
+- 弹出图形窗口，显示两条阶梯下降的生存曲线，治疗组（蓝）高于对照组（红）。
+- 控制台输出Log-rank检验结果：
+  Chisq=约5.8，df=1，p=0.016，提示两组生存差异显著。
+- summary(fit)输出每组的生存概率表和中位生存时间（治疗组约20个月，对照组约10个月）。
+
+测试建议：
+1. 将rate改为c(0.2, 0.2)使两组生存一致，此时p值应>0.05，验证检验有效性。
+2. 将event概率改为0.5以增加删失比例，观察曲线尾部截断。
+3. 使用conf.int=TRUE参数，在plot中加入置信区间带。
+
+常见问题或注意事项：
+- Survdiff()要求event列为0/1编码，1表示事件发生，0表示删失。
+- 分组变量应为factor类型，否则survfit可能会按数值排序，导致图例顺序混乱。
+- 绘制曲线时，若组数多于2组，建议使用rainbow()等配色，并增加cex参数调整图例大小。
+- 若使用survminer::ggsurvplot()可以获得更美观的图形，但需额外安装依赖包。

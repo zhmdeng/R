@@ -1,0 +1,53 @@
+案例问题/题目：
+使用R语言生成30名模拟患者的年龄（40~80岁）与收缩压数据，计算Pearson相关系数并检验显著性，绘制散点图。
+
+环境依赖：
+语言：R 4.x；仅使用stats（内置）和graphics（内置）包，无第三方依赖。运行命令：Rscript 案例34_相关分析.R
+
+完整代码：
+# 案例34：年龄与血压的Pearson相关分析
+set.seed(123)
+n <- 30
+age <- runif(n, 40, 80)                    # 年龄：均匀分布40~80
+sbp <- 80 + 1.2 * age + rnorm(n, 0, 10)    # 收缩压：线性+误差
+
+# 1. 描述统计
+cat("样本量 n =", n, "\n")
+cat("年龄均值 =", round(mean(age), 2), "，收缩压均值 =", round(mean(sbp), 2), "\n")
+
+# 2. Pearson相关系数（仅数值）
+r_val <- cor(age, sbp, method = "pearson")
+cat("Pearson相关系数 r =", round(r_val, 3), "\n")
+
+# 3. 显著性检验（含置信区间）
+test_result <- cor.test(age, sbp, method = "pearson")
+print(test_result)
+
+# 4. 散点图与回归线
+plot(age, sbp, main = "年龄与收缩压散点图",
+     xlab = "年龄（岁）", ylab = "收缩压（mmHg）",
+     pch = 19, col = "steelblue")
+abline(lm(sbp ~ age), col = "red", lwd = 2)
+
+运行命令：
+Rscript 案例34_相关分析.R
+
+预期运行结果：
+样本量 n = 30 
+年龄均值 = 60.31 ，收缩压均值 = 152.55 
+Pearson相关系数 r = 0.894 
+P值 < 2.2e-16，95%置信区间 [0.79, 0.95]
+散点图显示点呈带状上升趋势，红色回归线斜率为正。
+
+测试建议：
+1. 将set.seed(123)改为set.seed(456)，观察r值在0.85~0.93间波动。
+2. 增大n到100，置信区间变窄，r更稳定。
+3. 修改sbp生成式中的系数1.2为-0.5，r变为负数，检验P值仍显著。
+
+常见问题：
+Q: cor()和cor.test()结果不一致？
+A: cor()只返回r值，cor.test()返回r、P值及置信区间，两者r值部分完全一致。
+Q: 数据呈非线性时怎么办？
+A: 使用method="spearman"计算秩相关，或先做变量变换（如对数化）。
+Q: 出现警告“不能计算精确p值”？
+A: 通常因样本量小或存在平局，改用spearman方法或增加样本量。

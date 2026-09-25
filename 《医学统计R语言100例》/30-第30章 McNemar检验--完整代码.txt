@@ -1,0 +1,58 @@
+案例问题/题目：
+某医院比较新法A与传统法B对同一批40例患者的诊断结果（阳性/阴性），数据为配对设计。用McNemar检验判断两种方法检出率是否有显著差异。
+
+环境依赖：
+R 4.0+，仅标准库（stats）。运行命令：Rscript mcnemar_case.R
+
+完整代码：
+# 构造配对结果矩阵：行=A法，列=B法
+tab <- matrix(c(20, 5,   # A+ B+, A+ B-
+                 7,  8),  # A- B+, A- B-
+               nrow = 2, byrow = TRUE,
+               dimnames = list(A = c("阳性","阴性"),
+                               B = c("阳性","阴性")))
+print(tab)
+
+# 标准McNemar检验（带连续性校正）
+res <- mcnemar.test(tab)
+print(res)
+
+# 精确二项检验（小样本更准确）
+b <- tab[1,2]  # A+ B-
+c <- tab[2,1]  # A- B+
+binom.test(b, b + c, p = 0.5)
+
+运行命令：
+Rscript mcnemar_case.R
+
+预期运行结果：
+     B
+A     阳性 阴性
+  阳性   20    5
+  阴性    7    8
+
+	McNemar's Chi-squared test with continuity correction
+
+data:  tab
+McNemar's chi-squared = 0.083333, df = 1, p-value = 0.7728
+
+	Exact binomial test
+
+data:  5 and 12
+number of successes = 5, number of trials = 12, p-value = 0.7744
+alternative hypothesis: true probability of success is not equal to 0.5
+95 percent confidence interval:
+ 0.1570 0.6869
+sample estimates:
+probability of success 
+             0.4166667
+
+测试建议：
+1. 修改tab中的b和c值（如b=10,c=2），观察p值变化，理解不一致对子的作用。
+2. 对比mcnemar.test和binom.test结果，尤其当b+c<20时差异明显。
+
+常见问题或注意事项：
+1. 必须是配对二分类数据，独立两组比较不能用此检验。
+2. 列联表方向（谁为行、谁为列）不影响检验统计量，但解释结果时需注意。
+3. 当b+c非常小（<10）时，优先使用精确二项检验。
+4. 连续性校正可能导致保守结果，样本量大时影响可忽略。

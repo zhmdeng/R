@@ -1,0 +1,29 @@
+案例问题/题目：用boxplot()比较两组患者的血压分布，观察中位数、四分位数及异常值。
+
+环境依赖：R版本 ≥ 4.0；仅依赖R基础包（graphics），无需安装第三方包。
+
+完整代码：
+# 生成模拟数据
+set.seed(123)
+hypertension <- rnorm(30, mean = 155, sd = 12)
+control <- rnorm(30, mean = 125, sd = 10)
+
+# 绘制箱线图
+boxplot(hypertension, control,
+        names = c("高血压组", "对照组"),
+        col = c("lightcoral", "lightblue"),
+        main = "两组患者收缩压分布比较",
+        ylab = "收缩压 (mmHg)",
+        ylim = c(90, 190))
+
+# 添加参考线
+abline(h = 140, lty = 2, col = "gray40")
+text(2.5, 142, "正常上限 140 mmHg", col = "gray40", cex = 0.8)
+
+运行命令：Rscript 该脚本文件.R
+
+预期运行结果：生成一个图形窗口，显示两组箱线图。高血压组中位数约155 mmHg，对照组约125 mmHg；高血压组箱体整体高于对照组，且部分数据点超出上须（1.5×IQR范围），显示为异常值圆圈。
+
+测试建议：修改rnorm中的均值和标准差，观察箱线图变化；尝试用pch=19和cex=0.8调整异常值点的样式和大小。
+
+常见问题或注意事项：箱线图异常值范围采用1.5×IQR规则，异常值不等于数据错误，需结合临床判断；若两组数据偏离正态，应改用Wilcoxon秩和检验进行统计推断。

@@ -1,0 +1,58 @@
+案例问题/题目：
+某临床试验需将30例受试者按1:1完全随机分为治疗组（A）与对照组（B）。请用R的sample()函数实现，并区分“完全随机（允许组间人数不等）”与“等组随机（严格每组15例）”两种方式。
+
+环境依赖：
+语言：R（版本≥3.6）
+仅标准库，无第三方依赖。
+运行命令：Rscript 文件名.R 或 在R交互环境直接粘贴运行。
+
+完整代码：
+# 案例58：完全随机分组
+set.seed(2025)               # 固定种子，复现结果
+n <- 30
+id <- 1:n
+
+# 方法1：完全随机，每组人数不等
+group_rand <- sample(c("A","B"), size=n, replace=TRUE, prob=c(0.5,0.5))
+cat("完全随机分组结果：\n")
+print(table(group_rand))
+
+# 方法2：严格等组随机（每组15例）
+group_equal <- sample(rep(c("A","B"), each=n/2))
+cat("\n等组随机分组结果：\n")
+print(table(group_equal))
+
+# 输出分组明细
+df <- data.frame(编号=id, 分组=group_equal)
+print(df)
+
+# 验证
+stopifnot(all(group_equal %in% c("A","B")))
+stopifnot(length(group_equal) == 30)
+
+运行命令：
+Rscript case58_random_groups.R
+
+预期运行结果：
+完全随机分组结果：
+group_rand
+ A  B 
+14 16 
+等组随机分组结果：
+group_equal
+ A  B 
+15 15 
+编号  分组
+1      B
+2      A
+...（共30行）
+
+测试建议：
+1. 去掉set.seed再次运行，观察分组结果变化，确认随机性。
+2. 将n改为40，相应调整“each=n/2”，验证等组随机仍成立。
+3. 用identical()比较两次运行结果，若不设种子则不同，设相同种子则相同。
+
+常见问题或注意事项：
+1. 完全随机分组中人数可能不等，这是正常的随机波动，但临床试验常需等组设计以提高检验效能。
+2. 使用rep(c("A","B"), each=n/2)创建的标签向量中A和B各占一半，随后sample()打乱顺序即可实现等组随机。
+3. 切勿在分配中途改变set.seed()的值，否则会导致原分配无法复现，影响试验记录真实性。

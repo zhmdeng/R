@@ -1,0 +1,48 @@
+案例问题/题目：
+计算某试剂筛查的阳性预测值（PPV）并阐述临床用途。已知：患病率10%、灵敏度90%、特异度85%、受试者总数1000。
+
+环境依赖：
+R版本≥4.0；核心计算仅标准库，可选epiR包做交叉验证（安装命令：install.packages("epiR")）。
+
+完整代码：
+# 基础参数
+prev <- 0.10          # 患病率
+sens <- 0.90          # 灵敏度
+spec <- 0.85          # 特异度
+N <- 1000             # 总人数
+
+# 构建2x2列联表
+disease <- N * prev          # 实际患病数
+healthy <- N - disease       # 实际健康数
+TP <- disease * sens
+FN <- disease - TP
+TN <- healthy * spec
+FP <- healthy - TN
+
+# 手工计算PPV
+PPV_manual <- TP / (TP + FP)
+cat("手工计算PPV:", round(PPV_manual, 4), "\n")
+
+# 使用epiR包验证（如未安装请先运行 install.packages("epiR")）
+library(epiR)
+tab <- as.table(matrix(c(TP, FP, FN, TN), nrow = 2,
+                       dimnames = list(Test = c("阳性","阴性"),
+                                       Disease = c("患病","健康"))))
+result <- epi.tests(tab)
+cat("epiR计算PPV:", round(as.numeric(result$PV.plus), 4), "\n")
+
+运行命令：
+Rscript ppv_case52.R
+
+预期运行结果：
+手工计算PPV: 0.4 
+epiR计算PPV: 0.4 
+
+测试建议：
+1. 改变prev值（如0.01、0.5），观察PPV变化，加深对患病率影响的理解。
+2. 验证NPV：当特异度高且患病率低时，阴性预测值通常很高。
+
+常见问题或注意事项：
+- 若未安装epiR包，仅手工计算即可运行主案例。
+- 注意PPV与灵敏度的区别，避免临床解读错误。
+- 在低患病率人群中，即使测试指标优良，阳性结果仍需谨慎解读。

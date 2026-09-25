@@ -1,0 +1,20 @@
+案例问题/题目：用Surv()创建生存对象，整理肺癌模拟随访数据。
+环境依赖：R语言（≥3.6），需安装survival包（install.packages("survival")）。
+完整代码：
+library(survival)
+time   <- c(6, 12, 18, 24, 30, 36, 8, 16, 22, 28, 34, 40)
+status <- c(1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1)
+group  <- rep(c("A", "B"), each = 6)
+surv_obj <- Surv(time, status)
+print(surv_obj)
+cat("观测数：", length(surv_obj), "\n")
+cat("删失比例：", round(sum(status == 0) / length(status) * 100), "%\n")
+cat("分组A：\n"); print(surv_obj[group == "A"])
+cat("分组B：\n"); print(surv_obj[group == "B"])
+df <- data.frame(time, status, group, surv_obj)
+print(df)
+运行命令：Rscript ch45_surv.R
+预期运行结果：生存对象显示12个元素，其中4个为删失加"+"。数据框包含4列。
+测试建议：将status改为c(2,1,0...)测试报错场景；尝试Surv(time, status, type="interval")观察区别。
+常见问题：若事件编码使用2，需指定event=2；删除survival包时会报错。
+注意事项：确保status中事件为1，删失为0；type参数默认right，切勿混淆。

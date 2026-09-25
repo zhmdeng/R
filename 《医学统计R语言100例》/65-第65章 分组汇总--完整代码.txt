@@ -1,0 +1,53 @@
+案例问题/题目：用dplyr包的group_by()和summarise()按治疗组计算临床指标（年龄、收缩压）的样本量、均值和标准差。
+
+环境依赖：
+- R语言 4.x
+- 需要安装dplyr包（install.packages("dplyr")）
+- 运行命令：Rscript 65_group_summary.R
+
+完整代码：
+library(dplyr)
+
+# 模拟数据：3组各30例
+set.seed(42)
+clin_data <- data.frame(
+  group = rep(c("DrugA", "DrugB", "Placebo"), each = 30),
+  age = round(rnorm(90, 55, 8)),
+  sbp = round(rnorm(90, 140, 15))
+)
+
+# 分组汇总
+result <- clin_data %>%
+  group_by(group) %>%
+  summarise(
+    n = n(),
+    age_mean = mean(age), age_sd = sd(age),
+    sbp_mean = mean(sbp), sbp_sd = sd(sbp)
+  )
+
+print(result)
+
+运行命令：
+Rscript 65_group_summary.R
+
+预期运行结果：
+# A tibble: 3 × 6
+  group       n age_mean age_sd sbp_mean sbp_sd
+  <chr>   <int>    <dbl>  <dbl>    <dbl>  <dbl>
+1 DrugA      30     55.7   7.87     139.   14.3
+2 DrugB      30     54.7   7.49     141.   15.7
+3 Placebo    30     55.0   8.06     140.   13.9
+
+测试建议：
+1. 修改set.seed(42)为其他数值，验证结果变化。
+2. 在clin_data$sbp[1:5]中赋值为NA，再运行summary，对比是否在summarise()中添加na.rm=TRUE的效果差异。
+3. 增加分组变量（如性别），尝试用group_by(group, gender)进行双变量分组。
+
+常见问题：
+- 若报错找不到dplyr包，先运行install.packages("dplyr")安装。
+- 若数据含NA，请务必在mean()、sd()中加na.rm=TRUE，否则返回NA。
+- 若想保留小数位数，可用round()包裹mean计算。
+
+注意事项：
+- group_by()后不要忘记summarise()，否则不会生成新表。
+- 管道符%>%需要dplyr包或magrittr包支持。

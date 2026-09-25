@@ -1,0 +1,30 @@
+案例问题/题目：用anova()比较两个嵌套回归模型——分析BMI基础上加入Age能否显著改善对收缩压的预测。
+
+环境依赖：R语言（≥3.6），仅标准库（stats）。
+
+完整代码：
+set.seed(123)
+data <- data.frame(
+  BMI = rnorm(30, mean = 25, sd = 3),
+  Age = rnorm(30, mean = 55, sd = 10)
+)
+data$SBP <- 100 + 1.2*data$BMI + 0.4*data$Age + rnorm(30, sd = 8)
+
+fit1 <- lm(SBP ~ BMI, data = data)
+fit2 <- lm(SBP ~ BMI + Age, data = data)
+
+print(anova(fit1, fit2))
+
+运行命令：Rscript compare_models.R
+
+预期运行结果：
+Analysis of Variance Table
+Model 1: SBP ~ BMI
+Model 2: SBP ~ BMI + Age
+  Res.Df     RSS Df Sum of Sq      F  Pr(>F)  
+1     28 2115.1                              
+2     27 1731.4  1    383.72 5.9832 0.02137 *
+
+测试建议：修改Age系数为0.1再运行，观察P值变化；也可增加样本量至100验证稳定性。
+
+常见问题：若提示"models are not nested"，检查模型预测变量是否为子集关系；若P值接近0.05，建议用AIC或BIC辅助判断。

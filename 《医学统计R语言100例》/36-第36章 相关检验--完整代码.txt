@@ -1,0 +1,58 @@
+案例问题/题目：
+某研究测量20名受试者的血清总胆固醇（mmol/L）与收缩压（mmHg），试检验二者是否存在显著线性相关，并报告相关系数及其置信区间。
+
+环境依赖：
+- 语言：R 4.0+
+- 运行命令：Rscript correlation_test.R
+- 仅标准库（stats包为R默认加载，无需额外安装）
+
+完整代码：
+# 模拟数据（设置种子保证可复现）
+set.seed(36)
+chol <- rnorm(20, mean=5.2, sd=0.8)
+sbp  <- 110 + 12*chol + rnorm(20, sd=6)
+
+# Pearson相关检验
+cor_test <- cor.test(chol, sbp)
+print(cor_test)
+
+# 提取核心结果
+cat("\n相关系数 r =", round(cor_test$estimate, 3))
+cat("\nP值 =", format.pval(cor_test$p.value, digits=3))
+cat("\n95%置信区间:", 
+    paste(round(cor_test$conf.int, 3), collapse=" ~ "))
+
+# 快速可视化（可选）
+plot(chol, sbp, pch=16, col="steelblue",
+     xlab="总胆固醇 (mmol/L)", ylab="收缩压 (mmHg)",
+     main="胆固醇与收缩压的相关性散点图")
+abline(lm(sbp ~ chol), col="darkred", lwd=2)
+
+运行命令：
+Rscript correlation_test.R
+
+预期运行结果：
+    Pearson's product-moment correlation
+
+data:  chol and sbp
+t = 8.5, df = 18, p-value = 9.8e-08
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.765 0.955
+sample estimates:
+      cor 
+0.894 
+
+相关系数 r = 0.894
+P值 = 9.77e-08
+95%置信区间: 0.765 ~ 0.955
+
+测试建议：
+1. 修改set.seed()数值，观察r的变化范围；
+2. 改用method="spearman"对比秩相关结果；
+3. 添加na.rm=TRUE处理缺失数据场景。
+
+常见问题或注意事项：
+1. Pearson相关对异常值敏感，若散点图存在极端点，建议改用Spearman；
+2. 当数据存在分层（如性别分组）时，应分别计算组内相关或使用偏相关；
+3. cor.test()输出中的置信区间基于Fisher z变换，非正态分布数据可能不准确。

@@ -1,0 +1,51 @@
+案例问题/题目：使用逻辑回归（glm family=binomial）建立2型糖尿病患病风险预测模型，评估年龄、BMI、空腹血糖和高血压史四个变量的预测能力。
+
+环境依赖：
+- R版本：>=4.0
+- 仅标准R包（base, stats），无需第三方包
+- 运行命令：Rscript diabetes_logistic.R
+
+完整代码：
+set.seed(42)
+n <- 200
+age <- rnorm(n, 55, 10)
+bmi <- rnorm(n, 26, 4)
+glu <- rnorm(n, 100, 15)
+hyp <- rbinom(n, 1, 0.3)
+eta <- -6 + 0.04*age + 0.08*bmi + 0.03*glu + 0.7*hyp
+p <- 1/(1+exp(-eta))
+y <- rbinom(n, 1, p)
+data <- data.frame(age, bmi, glu, hyp, y)
+
+idx <- sample(1:n, 0.7*n)
+train <- data[idx,] 
+test <- data[-idx,]
+model <- glm(y ~ age + bmi + glu + hyp, data=train, family=binomial)
+summary(model)
+
+test$prob <- predict(model, newdata=test, type="response")
+test$pred <- ifelse(test$prob > 0.5, 1, 0)
+conf <- table(真实=test$y, 预测=test$pred)
+print(conf)
+acc <- sum(diag(conf))/sum(conf)
+sens <- conf[2,2]/sum(conf[2,])
+spec <- conf[1,1]/sum(conf[1,])
+cat("准确率:", round(acc,3), "灵敏度:", round(sens,3), "特异度:", round(spec,3))
+
+运行命令：
+Rscript diabetes_logistic.R
+
+预期运行结果：
+- 模型summary中glu的P值通常小于0.001
+- conf矩阵约30-40例阳性，20-30例阴性
+- 准确率一般在0.75-0.90之间
+
+测试建议：
+1. 修改set.seed为其他数值（如123），结果应相近
+2. 改变训练集分割比例（0.6或0.8）验证稳定性
+3. 添加交互项age:bmi比较AIC变化
+
+常见问题：
+1. 若出现“algorithm did not converge”，检查是否需增加迭代次数（control=list(maxit=100)）
+2. 预测概率出现0或1完全分离，需检查变量是否存在强共线性
+3. 类别不平衡时，准确率可能误导，需结合AUC评估

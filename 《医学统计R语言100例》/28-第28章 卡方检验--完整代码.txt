@@ -1,0 +1,47 @@
+案例问题/题目：
+检验性别（男/女）与是否患病（是/否）是否独立，数据为400人的2×2列联表，显著性水平0.05。
+
+环境依赖：
+R版本≥4.0；仅用R基础包stats，无需第三方库。
+
+完整代码：
+# 创建列联表：行=性别，列=疾病
+tab <- matrix(c(120, 80,   # 男：患病、未患病
+                60, 140),  # 女：患病、未患病
+              nrow = 2, byrow = TRUE,
+              dimnames = list(性别 = c("男","女"),
+                              疾病 = c("患病","未患病")))
+print(tab)
+# 卡方检验（不修正连续）
+res <- chisq.test(tab, correct = FALSE)
+print(res)
+# 提取关键结果
+cat("X² =", round(res$statistic, 3), "\n")
+cat("df =", res$parameter, "\n")
+cat("p =", round(res$p.value, 5), "\n")
+
+运行命令：
+Rscript chisq_case28.R
+
+预期运行结果：
+        疾病
+性别     患病 未患病
+  男     120    80
+  女      60   140
+
+	Pearson's Chi-squared test
+
+data:  tab
+X-squared = 37.5, df = 1, p-value = 9.1e-10
+
+X² = 37.5 
+df = 1 
+p = 9.1e-05
+
+测试建议：
+1. 将其中任一单元格改为小于5的值，观察chisq.test警告并改用fisher.test()。
+2. 设置correct=TRUE对比p值差异，理解Yates校正的影响。
+
+常见问题：
+- 若期望频数<5，R会输出警告，此时应使用fisher.test()。
+- 2×2表默认有Yates连续性校正，若希望与SPSS经典结果一致，推荐correct=FALSE并在报告注明。

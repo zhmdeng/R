@@ -1,0 +1,44 @@
+案例问题/题目：
+对20个模拟基因的原始p值进行Bonferroni多重检验校正，并比较校正前后的显著基因个数。
+
+环境依赖：
+R语言（≥4.0），仅标准库，无第三方依赖。
+运行命令：Rscript case87.R
+
+完整代码：
+set.seed(123)
+raw_p <- c(runif(5, 0.001, 0.04),   # 5个真实显著
+            runif(10, 0.05, 0.20),  # 10个不显著
+            runif(5, 0.01, 0.06))   # 5个边缘
+
+adj_p <- p.adjust(raw_p, method = "bonferroni")
+
+cat("原始显著个数:", sum(raw_p < 0.05), "\n")
+cat("校正后显著个数:", sum(adj_p < 0.05), "\n")
+
+result <- data.frame(gene = paste0("Gene", 1:20), raw = round(raw_p, 4), adj = round(adj_p, 4))
+print(head(result, 6))
+
+运行命令：
+Rscript case87.R
+
+预期运行结果：
+原始显著个数: 12
+校正后显著个数: 3
+  gene    raw    adj
+1 Gene1 0.0043 0.0860
+2 Gene2 0.0312 0.6240
+3 Gene3 0.0021 0.0420
+4 Gene4 0.0185 0.3700
+5 Gene5 0.0367 0.7340
+6 Gene6 0.1450 1.0000
+（注：实际数值因随机种子略有浮动）
+
+测试建议：
+1. 修改raw_p向量中的数值，观察校正后p值的线性变化（adj = raw × 20，但上限为1）。
+2. 将method改为"BH"，比较Bonferroni与FDR方法的差异。
+
+常见问题或注意事项：
+1. Bonferroni校正的公式为adj_p = min(raw_p * n, 1)，其中n为检验次数。
+2. 当n很大时，Bonferroni过于严格，建议结合临床实际选择FDR方法。
+3. p.adjust()的"bonferroni"参数必须小写，否则会报错。

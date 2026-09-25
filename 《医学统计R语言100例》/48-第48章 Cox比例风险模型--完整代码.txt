@@ -1,0 +1,32 @@
+案例问题/题目：用Cox比例风险模型构建多因素生存分析模型，评估年龄、性别、治疗分组对生存时间的影响，输出HR及95%CI。
+
+环境依赖：R 4.x，仅依赖survival包（install.packages("survival")）。运行命令：source("case48_cox.R") 或 Rscript case48_cox.R
+
+完整代码：
+library(survival)
+set.seed(48)
+n <- 200
+data <- data.frame(
+  time = rexp(n, rate = 0.05),
+  status = rbinom(n, 1, 0.7),
+  age = rnorm(n, 60, 10),
+  sex = factor(sample(c("男","女"), n, replace=TRUE)),
+  trt = factor(sample(c("A","B"), n, replace=TRUE))
+)
+model <- coxph(Surv(time, status) ~ age + sex + trt, data = data)
+summary(model)
+HR <- exp(coef(model))
+CI <- exp(confint(model))
+print(cbind(HR, CI))
+
+运行命令：Rscript case48_cox.R
+
+预期运行结果：summary输出各变量coef、exp(coef)、se、z、Pr(>|z|)。例如age的HR约0.99（P>0.05），sex女的HR约0.98，trtB的HR约1.05等，具体数值因模拟随机种子而异，但结构固定。
+
+测试建议：更换数据集时，确保time>0，status取0或1；将分类变量转为factor；用cox.zph(model)检验PH假设，若P<0.05可考虑分层或时依协变量。
+
+常见问题/注意事项：
+1. status必须为0/1，不允许其他数值。
+2. 若数据有缺失，需先na.omit或mice填补。
+3. HR>1为危险因素，HR<1为保护因素，但需结合P值和CI判断。
+4. 样本量过小或事件数不足时结果不稳定，建议事件数≥变量的10倍。

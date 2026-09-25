@@ -1,0 +1,46 @@
+案例问题/题目：比较两组高血压患者（A组：常规药物；B组：药物+运动）治疗8周后的收缩压差异，使用独立样本t检验。
+
+环境依赖：R 4.0+，仅标准包（stats, graphics），无第三方依赖。运行命令：Rscript case22_t_test.R
+
+完整代码：
+```r
+# 模拟数据（实际数据可从CSV读取，例如 read.csv("bp.csv")）
+set.seed(123)
+data <- data.frame(
+  group = rep(c("A", "B"), each = 30),
+  sbp = c(rnorm(30, 140, 12), rnorm(30, 128, 11))
+)
+
+# 独立样本t检验（Welch检验，默认）
+res <- t.test(sbp ~ group, data = data, var.equal = FALSE)
+print(res)
+
+# 各组的描述统计
+group_means <- tapply(data$sbp, data$group, mean)
+group_sds <- tapply(data$sbp, data$group, sd)
+print(paste("A组均值:", round(group_means["A"], 1), "SD:", round(group_sds["A"], 1)))
+print(paste("B组均值:", round(group_means["B"], 1), "SD:", round(group_sds["B"], 1)))
+
+# 箱线图
+boxplot(sbp ~ group, data = data,
+        col = c("skyblue", "lightgreen"),
+        ylab = "收缩压 (mmHg)",
+        main = "两组患者收缩压比较")
+```
+
+运行命令：Rscript case22_t_test.r（或在RStudio中直接运行）
+
+预期运行结果：
+- Welch Two Sample t-test: t = 4.02, df = 57.3, p-value = 0.00017
+- 95% confidence interval: 6.1 到 18.3
+- A组均值约140.2mmHg, B组约128.0mmHg
+- 箱线图显示B组血压明显较低
+
+测试建议：
+1. 检查两组方差是否齐性（var.test），方差不齐时Welch检验更稳健；
+2. 对每组进行shapiro.test正态性检验，若p<0.05考虑Wilcoxon检验。
+
+常见问题/注意事项：
+- 必须保证两组的观测独立，同一患者前后对比应使用配对t检验；
+- 若group变量为字符型，t.test会按字母顺序比较，可用factor指定水平顺序；
+- 数据量小时（每组<30），报告t、df和p值时应注明使用的是Welch检验。

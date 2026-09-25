@@ -1,0 +1,49 @@
+案例问题/题目：用for循环批量计算多个连续变量的均值，并输出变量名与均值对照表。
+
+环境依赖：R 4.0+，仅标准库（base），无需安装任何第三方包。
+
+完整代码：
+# 模拟临床数据（生成30个患者的5项检验指标）
+set.seed(123)
+df <- data.frame(
+  WBC = rnorm(30, 6.5, 1.2),   # 白细胞计数(×10^9/L)
+  Hb  = rnorm(30, 135, 10),    # 血红蛋白(g/L)
+  PLT = rnorm(30, 220, 40),    # 血小板(×10^9/L)
+  ALT = rnorm(30, 25, 8),      # 丙氨酸氨基转移酶(U/L)
+  AST = rnorm(30, 28, 9)       # 天门冬氨酸氨基转移酶(U/L)
+)
+
+# 用for循环计算每个变量的均值
+var_names <- names(df)                 # 获取所有变量名
+means <- numeric(length(var_names))    # 预分配数值向量
+
+for (i in seq_along(var_names)) {
+  means[i] <- mean(df[[var_names[i]]], na.rm = TRUE)
+}
+
+# 整理并打印结果
+result <- data.frame(
+  变量 = var_names,
+  均值 = round(means, 2)
+)
+print(result)
+
+运行命令：Rscript mean_loop.R  （或复制到RStudio中直接运行）
+
+预期运行结果：
+    变量   均值
+1   WBC   6.51
+2    Hb 134.51
+3   PLT 223.41
+4   ALT  25.06
+5   AST  28.47
+
+测试建议：
+1. 将df中任意1-2个数值替换为NA（如 df$ALT[3] <- NA），再次运行，验证na.rm=TRUE的作用。
+2. 在df中新增一列（如 NEUT = rnorm(30, 4.5, 1)），循环会自动纳入新变量计算均值，无需修改代码。
+3. 尝试用print(result)与View(result)对比查看结果格式。
+
+常见问题或注意事项：
+- 务必使用双层方括号df[[name]]提取列，若写成df$name[i]会因name是字符串而报错。
+- 循环前用numeric(length(var_names))预分配向量，避免在循环内用c()反复拼接，降低运行效率。
+- 当数据存在缺失值时，mean()需设置na.rm=TRUE，否则返回NA。

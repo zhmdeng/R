@@ -1,0 +1,60 @@
+案例问题/题目：
+某医院评估一种新型快速检测试剂对某疾病的筛查价值。在200名疑似患者中，金标准确诊60例患病，140例未患病。新试剂检测结果：患病者中54例阳性，6例阴性；未患病者中14例阳性，126例阴性。请计算阴性预测值（NPV）并解释其临床意义。
+
+环境依赖：
+R 4.x（仅标准库，无第三方依赖）。运行命令：Rscript case53_negative_predictive_value.R
+
+完整代码：
+# 案例53：阴性预测值（NPV）计算与临床应用
+# 建立四格表
+TP <- 54; FP <- 14
+FN <- 6;  TN <- 126
+
+# 计算NPV
+NPV <- TN / (TN + FN)
+
+# 同时计算灵敏度与特异度
+sens <- TP / (TP + FN)
+spec <- TN / (TN + FP)
+
+# 输出结果
+cat("灵敏度:", round(sens, 3), "\n")
+cat("特异度:", round(spec, 3), "\n")
+cat("阴性预测值:", round(NPV, 3), "\n")
+cat("阴性预测值百分比:", round(NPV * 100, 1), "%\n")
+
+# 模拟不同患病率对NPV的影响
+prev <- c(0.05, 0.10, 0.20, 0.30)
+for (p in prev) {
+  n <- 1000
+  diseased <- n * p
+  healthy <- n - diseased
+  TP_sim <- diseased * sens
+  FN_sim <- diseased - TP_sim
+  TN_sim <- healthy * spec
+  FP_sim <- healthy - TN_sim
+  npv_sim <- TN_sim / (TN_sim + FN_sim)
+  cat("患病率", p, "时NPV:", round(npv_sim, 3), "\n")
+}
+
+运行命令：
+Rscript case53_negative_predictive_value.R
+
+预期运行结果：
+灵敏度: 0.9 
+特异度: 0.9 
+阴性预测值: 0.955 
+阴性预测值百分比: 95.5% 
+患病率 0.05 时NPV: 0.994 
+患病率 0.1 时NPV: 0.988 
+患病率 0.2 时NPV: 0.974 
+患病率 0.3 时NPV: 0.955
+
+测试建议：
+1. 可修改TP、FP、FN、TN数值验证不同试验的NPV变化。
+2. 绘制患病率-NPV曲线进一步直观观察趋势。
+
+常见问题或注意事项：
+1. NPV受患病率影响极大，报告时必须注明研究人群的患病率。
+2. 低患病率时NPV虚高，不可误判试验“很好”，应结合LR-或Fagan诺模图综合判断。
+3. 本案例假设金标准完全准确，实际中金标准也可能有误。

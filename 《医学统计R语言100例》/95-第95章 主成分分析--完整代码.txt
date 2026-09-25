@@ -1,0 +1,48 @@
+案例问题/题目：
+使用R内置iris数据集，通过prcomp()执行主成分分析（PCA），提取前两个主成分，计算方差贡献率，绘制碎石图和PCA得分图（按品种着色），验证降维效果。
+
+环境依赖：
+R语言（≥4.0），需要ggplot2包（若未安装，运行install.packages("ggplot2")）。数据为R基础数据集，无需额外下载。
+
+完整代码：
+# 加载数据
+data(iris)
+X <- iris[, 1:4]
+
+# 主成分分析（标准化）
+pca <- prcomp(X, scale. = TRUE)
+
+# 方差贡献率
+print(summary(pca))
+
+# 可视化1：碎石图
+screeplot(pca, type = "lines", main = "Scree Plot")
+
+# 可视化2：PCA得分图（ggplot2）
+library(ggplot2)
+scores <- data.frame(pca$x, Species = iris$Species)
+ggplot(scores, aes(x = PC1, y = PC2, color = Species)) +
+  geom_point(size = 3, alpha = 0.8) +
+  labs(title = "PCA of Iris") +
+  theme_minimal()
+
+# 可选：双标图
+# biplot(pca, scale = 0)
+
+运行命令：
+Rscript pca_case.R   # 或直接在RStudio中运行
+
+预期运行结果：
+1. summary()输出中，PC1方差比例约0.73，PC2约0.23，前两轴累计>95%。
+2. 碎石图显示特征值在第3个主成分后趋于平稳。
+3. 得分图中setosa完全分离，versicolor和virginica部分重叠。
+
+测试建议：
+- 尝试scale.=FALSE，查看量纲对主成分方向的影响。
+- 替换为USArrests数据集（4个犯罪变量），观察州际聚类模式。
+
+常见问题或注意事项：
+1. 若变量单位不一致且未标准化，PC1将对高方差变量过度加权。
+2. prcomp()默认使用协方差矩阵；要基于相关矩阵，必须设scale=TRUE。
+3. 碎石图中“肘部”是主观判断，可结合累计贡献率阈值（如>80%）确定主成分数。
+4. 若图形中文显示乱码，需设置中文字体或改用英文标签。

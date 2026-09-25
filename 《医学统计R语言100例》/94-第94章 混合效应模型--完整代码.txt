@@ -1,0 +1,33 @@
+案例问题/题目：多中心临床试验数据，每中心多名患者接受治疗或对照，需估计治疗效应同时考虑中心间随机截距差异。使用lme4包拟合混合效应模型。
+
+环境依赖：R 4.0+，需安装lme4包（install.packages("lme4")）。无其他第三方依赖。
+
+完整代码：
+library(lme4)
+set.seed(123)
+site <- rep(paste0("Site",1:4), each=10)
+treatment <- rep(c(0,1), each=5, times=4)
+bp <- 120 + 5*treatment + rep(rnorm(4,0,5), each=10) + rnorm(40,0,8)
+df <- data.frame(site, treatment, bp)
+
+model <- lmer(bp ~ treatment + (1|site), data=df)
+summary(model)
+confint(model)
+
+运行命令：Rscript script.R
+
+预期运行结果：
+- 固定效应treatment估计约4.5-6.0，标准误约3-4，t值约1.5-2.0（因中心数少，p值可能需lmerTest）。
+- 随机效应：site标准差约5，残差标准差约8。
+- confint()给出treatment效应95%置信区间，大概率包含正数。
+
+测试建议：
+1. 将中心数改为8，每组10人，观察随机效应估计更稳定。
+2. 比较lm()与lmer()的treatment标准误，后者应更大（因考虑了中心聚类）。
+3. 若出现收敛警告，可尝试增加maxlmer控制参数或中心化变量。
+
+常见问题/注意事项：
+- 若提示"boundary (singular) fit"，可能随机效应方差为0，可减少中心数或改用固定效应。
+- p值计算建议使用lmerTest包（anova(model)或summary(model)）。
+- 因子变量应显式编码（如treatment=0/1），避免字符型被误判。
+- 随机截距模型假设中心效应服从正态分布，中心数少于5时该假设较难检验。

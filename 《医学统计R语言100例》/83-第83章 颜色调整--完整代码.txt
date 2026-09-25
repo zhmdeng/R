@@ -1,0 +1,43 @@
+案例问题/题目：
+使用ggplot2绘制三组（良性/恶性/健康）肿瘤标志物CA125与HE4的散点图，通过scale_color_manual()自定义组别颜色，并调整图例标题与点形，输出用于论文投稿的彩色散点图。
+
+环境依赖：
+仅依赖R语言（≥4.0）及ggplot2包（install.packages("ggplot2")）。运行命令：R -e "source('case83.R')" 或在RStudio中直接运行。
+
+完整代码：
+library(ggplot2)
+# 模拟数据：50例样本，3组
+set.seed(42)
+dat <- data.frame(
+  group = rep(c("良性", "恶性", "健康"), each = 50),
+  CA125 = c(rnorm(50, 35, 8), rnorm(50, 68, 12), rnorm(50, 20, 5)),
+  HE4   = c(rnorm(50, 70, 12), rnorm(50, 110, 15), rnorm(50, 55, 9))
+)
+# 自定义颜色和形状
+p <- ggplot(dat, aes(x = CA125, y = HE4, color = group, shape = group)) +
+  geom_point(size = 2.5, alpha = 0.7) +
+  scale_color_manual(
+    values = c("良性" = "#2C5F8A", "恶性" = "#E64B35", "健康" = "#4DBBD5"),
+    name = "病理分组"
+  ) +
+  scale_shape_manual(values = c("良性" = 16, "恶性" = 17, "健康" = 15)) +
+  theme_minimal(base_size = 14) +
+  labs(x = "CA125 (U/mL)", y = "HE4 (pmol/L)")
+
+print(p)
+
+运行命令：
+Rscript -e "source('case83.R')"
+
+预期运行结果：
+生成一张散点图，显示三组不同颜色与形状的点：良性（深蓝实心圆）、恶性（橙红三角）、健康（亮绿方块）。图例标题为“病理分组”，x轴为CA125，y轴为HE4，点透明度0.7，整体为极简主题。
+
+测试建议：
+1. 尝试将alpha改为1.0，观察点重叠情况。
+2. 修改values中的颜色十六进制码，验证自定义颜色是否生效。
+3. 删除scale_shape_manual()，观察图例形状变化。
+
+常见问题或注意事项：
+1. 若使用fill而不是color映射分组，需改用scale_fill_manual()，不能混用。
+2. 中文图例在某些图形设备易乱码，建议在theme中设置family = "sans"。
+3. 自定义颜色务必确保颜色名称与数据中的因子级别完全一致（区分大小写）。

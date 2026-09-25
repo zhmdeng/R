@@ -1,0 +1,50 @@
+案例问题/题目：
+使用survival包的colon数据集，比较三种治疗组（观察、Levamisole、Lev+5-FU）的生存曲线，并用ggsurvplot()绘制带风险表和P值的KM曲线。
+
+环境依赖：
+R >= 4.0，需安装包：survival, survminer
+运行命令：Rscript script.R 或 RStudio中逐行执行
+
+完整代码：
+library(survival)
+library(survminer)
+data(colon)
+
+# 拟合生存模型：status=1为事件（复发/死亡），0为删失
+fit <- survfit(Surv(time, status) ~ rx, data = colon)
+
+# 绘制生存曲线
+p <- ggsurvplot(fit,
+                data = colon,
+                pval = TRUE,             # 显示log-rank检验P值
+                risk.table = TRUE,       # 添加风险表
+                conf.int = TRUE,         # 置信区间
+                palette = c("#E64B35", "#4DBBD5", "#00A087"),
+                xlab = "时间（天）",
+                ylab = "生存概率",
+                legend.title = "治疗组",
+                legend.labs = c("观察", "Levamisole", "Lev+5-FU"),
+                ggtheme = theme_minimal())
+
+print(p)
+# 可选保存
+# ggsave("survival_plot.png", print(p), width = 8, height = 6, dpi = 300)
+
+运行命令：
+Rscript 80_ggsurvplot.R
+
+预期运行结果：
+1. 控制台无报错；
+2. 绘图窗口出现三条彩色曲线，各带置信区间带；
+3. 图形下方显示风险表，列出0, 500, 1000, 1500天风险人数；
+4. 图中右上角显示log-rank检验的P值（通常<0.001）。
+
+测试建议：
+1. 修改palette为c("grey", "blue", "red")验证颜色变化；
+2. 删除risk.table=TRUE后确认风险表消失；
+3. 尝试使用colon的其他协变量（如sex）分组对比。
+
+常见问题或注意事项：
+1. status变量编码必须确认：1为事件、0为删失；若反了，生存曲线会错误上升。
+2. survminer依赖ggplot2，若提示缺包先install.packages("survminer")。
+3. 若数据含NA，需用na.omit(colon)预处理，否则可能报错。

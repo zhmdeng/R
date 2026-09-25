@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+ <title>《医学统计R语言100例》 · 课程目录</title>
+ <style>
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+ body {
+ background: linear-gradient(145deg, #f0f9ff 0%, #e6f5e9 100%);
+ font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+ min-height: 100vh;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ padding: 2rem 1.5rem 1rem;
+ color: #1e3c4f;
+ }
+ .course-wrapper {
+ max-width: 1300px;
+ width: 100%;
+ background: rgba(255, 255, 255, 0.70);
+ backdrop-filter: blur(2px);
+ border-radius: 48px 48px 32px 32px;
+ padding: 2rem 2rem 1.5rem;
+ box-shadow: 0 20px 40px rgba(0, 40, 60, 0.12);
+ border: 2px solid rgba(255, 240, 150, 0.5);
+ }
+ .header-title {
+ display: flex;
+ align-items: baseline;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ margin-bottom: 2rem;
+ border-bottom: 6px solid #fdd835;
+ padding-bottom: 0.75rem;
+ }
+ .header-title h1 {
+ font-size: 2.6rem;
+ font-weight: 700;
+ background: linear-gradient(135deg, #0077b6, #00b4d8);
+ -webkit-background-clip: text;
+ background-clip: text;
+ color: transparent;
+ display: inline-flex;
+ align-items: center;
+ gap: 12px;
+ }
+ .header-title h1::before {
+ content: "📘";
+ font-size: 2.2rem;
+ background: #fff2c0;
+ padding: 0 8px;
+ border-radius: 40px;
+ }
+ .header-title .subhead {
+ font-size: 1.1rem;
+ background: #b7e4c7;
+ padding: 0.4rem 1.2rem;
+ border-radius: 40px;
+ color: #1b4d3d;
+ font-weight: 600;
+ }
+ .catalog-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+ gap: 1.2rem;
+ margin: 1.8rem 0 1.2rem;
+ }
+ .chapter-card {
+ background: #ffffffdd;
+ backdrop-filter: blur(4px);
+ border-radius: 28px;
+ padding: 1.2rem;
+ transition: all 0.2s ease;
+ border: 3px solid #ffd966;
+ box-shadow: 0 6px 0 #e0c27a;
+ cursor: pointer;
+ position: relative;
+ }
+ .chapter-card:hover {
+ transform: translateY(-4px);
+ border-color: #f9c74f;
+ background: #fffef7;
+ }
+ .chapter-badge {
+ display: inline-block;
+ background: #f94144;
+ color: white;
+ font-weight: 700;
+ font-size: 0.9rem;
+ padding: 0.1rem 0.9rem;
+ border-radius: 40px;
+ margin-bottom: 0.5rem;
+ }
+ .chapter-link {
+ text-decoration: none;
+ color: inherit;
+ display: block;
+ }
+ .chapter-title {
+ font-size: 1.2rem;
+ font-weight: 700;
+ color: #023e8a;
+ margin: 0.2rem 0 0.4rem;
+ line-height: 1.3;
+ }
+ .chapter-desc {
+ font-size: 0.85rem;
+ color: #1e4a5f;
+ line-height: 1.4;
+ margin: 0.2rem 0;
+ padding-left: 10px;
+ border-left: 4px solid #90e0ef;
+ }
+ .card-tags {
+ margin-top: 0.6rem;
+ display: flex;
+ flex-wrap: wrap;
+ gap: 0.4rem;
+ }
+ .tag {
+ background: #d8f3dc;
+ color: #1b4332;
+ font-size: 0.7rem;
+ padding: 0.2rem 0.8rem;
+ border-radius: 30px;
+ font-weight: 600;
+ }
+ .chapter-card a.chapter-link::before {
+ content: "";
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ border-radius: 28px;
+ z-index: 1;
+ }
+ .chapter-card > *:not(a.chapter-link) {
+ position: relative;
+ z-index: 2;
+ pointer-events: none;
+ }
+ @media (max-width: 680px) {
+ .course-wrapper { padding: 1.2rem; }
+ .header-title h1 { font-size: 2rem; }
+ .catalog-grid { grid-template-columns: 1fr; }
+ }
+ .footer {
+ max-width: 1300px;
+ width: 100%;
+ margin-top: 1.5rem;
+ text-align: center;
+ padding: 1rem;
+ }
+ .footer a {
+ display: inline-block;
+ background: linear-gradient(135deg, #fce8e8, #fff);
+ padding: 0.9rem 2.8rem;
+ border-radius: 60px;
+ font-weight: 600;
+ font-size: 1rem;
+ color: #a02929;
+ text-decoration: none;
+ border: 1px solid rgba(200, 50, 50, 0.3);
+ transition: all 0.2s ease;
+ box-shadow: 0 4px 12px rgba(200, 30, 30, 0.08);
+ }
+ .footer a:hover {
+ background: linear-gradient(135deg, #ffd9d9, #ffe6e6);
+ border-color: #c92a2a;
+ box-shadow: 0 8px 18px rgba(200, 30, 30, 0.15);
+ transform: scale(1.01);
+ color: #8a1f1f;
+ }
+ .footer-note {
+ margin-top: 0.8rem;
+ font-size: 0.95rem;
+ color: #2c5a6b;
+ background: rgba(255, 245, 200, 0.5);
+ display: inline-block;
+ padding: 0.3rem 2rem;
+ border-radius: 40px;
+ font-weight: 500;
+ letter-spacing: 1px;
+ }
+ 
+/* 程序固定生成的三列紧凑目录：适合100至200个章节。 */
+body {
+ background: #002fa7 !important;
+ padding: 22px !important;
+}
+.course-wrapper {
+ max-width: 1060px !important;
+ width: calc(100% - 20px) !important;
+ background: #ffffff !important;
+ border: 9px solid #e60012 !important;
+ border-radius: 22px !important;
+ padding: 22px 26px 18px !important;
+ box-shadow: 0 18px 42px rgba(0, 0, 0, .28) !important;
+}
+.header-title {
+ border-bottom: 5px solid #002fa7 !important;
+ margin-bottom: 14px !important;
+ padding-bottom: 12px !important;
+}
+.header-title h1 {
+ color: #002fa7 !important;
+ background: none !important;
+ -webkit-text-fill-color: #002fa7 !important;
+ font-size: 2.15rem !important;
+}
+.header-title .subhead {
+ color: #ffffff !important;
+ background: #002fa7 !important;
+ font-size: 1rem !important;
+}
+.catalog-grid {
+ display: grid !important;
+ grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+ column-gap: 18px !important;
+ row-gap: 0 !important;
+}
+.compact-chapter-item {
+ display: flex; align-items: center; min-width: 0;
+ padding: 7px 5px; color: #102a56; text-decoration: none;
+ border-bottom: 1px solid #bfdbfe; line-height: 1.4;
+}
+.compact-chapter-item:hover {
+ color: #1d4ed8; background: #eff6ff;
+}
+.compact-chapter-no {
+ flex: 0 0 38px; color: #e60012; font-size: 15px;
+ font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.compact-chapter-title {
+ min-width: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+ font-size: 17px; font-weight: 700; overflow-wrap: anywhere;
+}
+@media (max-width: 900px) {
+ .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 680px) {
+ .catalog-grid { grid-template-columns: 1fr !important; }
+ .compact-chapter-title { font-size: 17px; }
+}
+
+</style>
+
+<style id="coursegen-mobile-code-fix-v1">
+pre, pre code { max-width:100% !important; box-sizing:border-box !important; }
+pre { display:block; width:100%; min-width:0; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
+@media (max-width:860px) {
+  html, body { max-width:100%; overflow-x:hidden; }
+  pre, pre code { white-space:pre-wrap !important; overflow-wrap:anywhere !important; word-break:break-word !important; }
+  pre { padding:13px !important; font-size:13px !important; line-height:1.6 !important; }
+}
+</style>
+
+</head>
+<body>
+<div class="course-wrapper">
+ <div class="header-title">
+ <h1>《医学统计R语言100例》</h1>
+ <span class="subhead">📚 共计 100 章节</span>
+ </div>
+ <div class="catalog-grid">
+ <!-- 章节1 -->
+ <a class="compact-chapter-item" href="01.html">
+ <span class="compact-chapter-no">01</span>
+ <span class="compact-chapter-title">安装并加载R包</span>
+ </a>
+ <!-- 章节2 -->
+ <a class="compact-chapter-item" href="02.html">
+ <span class="compact-chapter-no">02</span>
+ <span class="compact-chapter-title">创建向量</span>
+ </a>
+ <!-- 章节3 -->
+ <a class="compact-chapter-item" href="03.html">
+ <span class="compact-chapter-no">03</span>
+ <span class="compact-chapter-title">创建数据框</span>
+ </a>
+ <!-- 章节4 -->
+ <a class="compact-chapter-item" href="04.html">
+ <span class="compact-chapter-no">04</span>
+ <span class="compact-chapter-title">读取CSV文件</span>
+ </a>
+ <!-- 章节5 -->
+ <a class="compact-chapter-item" href="05.html">
+ <span class="compact-chapter-no">05</span>
+ <span class="compact-chapter-title">写入CSV文件</span>
+ </a>
+ <!-- 章节6 -->
+ <a class="compact-chapter-item" href="06.html">
+ <span class="compact-chapter-no">06</span>
+ <span class="compact-chapter-title">因子转换</span>
+ </a>
+ <!-- 章节7 -->
+ <a class="compact-chapter-item" href="07.html">
+ <span class="compact-chapter-no">07</span>
+ <span class="compact-chapter-title">缺失值统计</span>
+ </a>
+ <!-- 章节8 -->
+ <a class="compact-chapter-item" href="08.html">
+ <span class="compact-chapter-no">08</span>
+ <span class="compact-chapter-title">缺失值删除</span>
+ </a>
+ <!-- 章节9 -->
+ <a class="compact-chapter-item" href="09.html">
+ <span class="compact-chapter-no">09</span>
+ <span class="compact-chapter-title">缺失值填补</span>
+ </a>
+ <!-- 章节10 -->
+ <a class="compact-chapter-item" href="10.html">
+ <span class="compact-chapter-no">10</span>
+ <span class="compact-chapter-title">数据排序</span>
+ </a>
+ <!-- 章节11 -->
+ <a class="compact-chapter-item" href="11.html">
+ <span class="compact-chapter-no">11</span>
+ <span class="compact-chapter-title">数据筛选</span>
+ </a>
+ <!-- 章节12 -->
+ <a class="compact-chapter-item" href="12.html">
+ <span class="compact-chapter-no">12</span>
+ <span class="compact-chapter-title">数据抽样</span>
+ </a>
+ <!-- 章节13 -->
+ <a class="compact-chapter-item" href="13.html">
+ <span class="compact-chapter-no">13</span>
+ <span class="compact-chapter-title">描述性统计</span>
+ </a>
+ <!-- 章节14 -->
+ <a class="compact-chapter-item" href="14.html">
+ <span class="compact-chapter-no">14</span>
+ <span class="compact-chapter-title">分组均值</span>
+ </a>
+ <!-- 章节15 -->
+ <a class="compact-chapter-item" href="15.html">
+ <span class="compact-chapter-no">15</span>
+ <span class="compact-chapter-title">频数表</span>
+ </a>
+ <!-- 章节16 -->
+ <a class="compact-chapter-item" href="16.html">
+ <span class="compact-chapter-no">16</span>
+ <span class="compact-chapter-title">比例表</span>
+ </a>
+ <!-- 章节17 -->
+ <a class="compact-chapter-item" href="17.html">
+ <span class="compact-chapter-no">17</span>
+ <span class="compact-chapter-title">直方图</span>
+ </a>
+ <!-- 章节18 -->
+ <a class="compact-chapter-item" href="18.html">
+ <span class="compact-chapter-no">18</span>
+ <span class="compact-chapter-title">箱线图</span>
+ </a>
+ <!-- 章节19 -->
+ <a class="compact-chapter-item" href="19.html">
+ <span class="compact-chapter-no">19</span>
+ <span class="compact-chapter-title">散点图</span>
+ </a>
+ <!-- 章节20 -->
+ <a class="compact-chapter-item" href="20.html">
+ <span class="compact-chapter-no">20</span>
+ <span class="compact-chapter-title">条形图</span>
+ </a>
+ <!-- 章节21 -->
+ <a class="compact-chapter-item" href="21.html">
+ <span class="compact-chapter-no">21</span>
+ <span class="compact-chapter-title">单样本t检验</span>
+ </a>
+ <!-- 章节22 -->
+ <a class="compact-chapter-item" href="22.html">
+ <span class="compact-chapter-no">22</span>
+ <span class="compact-chapter-title">独立样本t检验</span>
+ </a>
+ <!-- 章节23 -->
+ <a class="compact-chapter-item" href="23.html">
+ <span class="compact-chapter-no">23</span>
+ <span class="compact-chapter-title">配对t检验</span>
+ </a>
+ <!-- 章节24 -->
+ <a class="compact-chapter-item" href="24.html">
+ <span class="compact-chapter-no">24</span>
+ <span class="compact-chapter-title">方差齐性检验</span>
+ </a>
+ <!-- 章节25 -->
+ <a class="compact-chapter-item" href="25.html">
+ <span class="compact-chapter-no">25</span>
+ <span class="compact-chapter-title">正态性检验</span>
+ </a>
+ <!-- 章节26 -->
+ <a class="compact-chapter-item" href="26.html">
+ <span class="compact-chapter-no">26</span>
+ <span class="compact-chapter-title">单因素方差分析</span>
+ </a>
+ <!-- 章节27 -->
+ <a class="compact-chapter-item" href="27.html">
+ <span class="compact-chapter-no">27</span>
+ <span class="compact-chapter-title">多重比较</span>
+ </a>
+ <!-- 章节28 -->
+ <a class="compact-chapter-item" href="28.html">
+ <span class="compact-chapter-no">28</span>
+ <span class="compact-chapter-title">卡方检验</span>
+ </a>
+ <!-- 章节29 -->
+ <a class="compact-chapter-item" href="29.html">
+ <span class="compact-chapter-no">29</span>
+ <span class="compact-chapter-title">Fisher精确检验</span>
+ </a>
+ <!-- 章节30 -->
+ <a class="compact-chapter-item" href="30.html">
+ <span class="compact-chapter-no">30</span>
+ <span class="compact-chapter-title">McNemar检验</span>
+ </a>
+ <!-- 章节31 -->
+ <a class="compact-chapter-item" href="31.html">
+ <span class="compact-chapter-no">31</span>
+ <span class="compact-chapter-title">Wilcoxon秩和检验</span>
+ </a>
+ <!-- 章节32 -->
+ <a class="compact-chapter-item" href="32.html">
+ <span class="compact-chapter-no">32</span>
+ <span class="compact-chapter-title">Kruskal-Wallis检验</span>
+ </a>
+ <!-- 章节33 -->
+ <a class="compact-chapter-item" href="33.html">
+ <span class="compact-chapter-no">33</span>
+ <span class="compact-chapter-title">符号秩检验</span>
+ </a>
+ <!-- 章节34 -->
+ <a class="compact-chapter-item" href="34.html">
+ <span class="compact-chapter-no">34</span>
+ <span class="compact-chapter-title">相关分析</span>
+ </a>
+ <!-- 章节35 -->
+ <a class="compact-chapter-item" href="35.html">
+ <span class="compact-chapter-no">35</span>
+ <span class="compact-chapter-title">Spearman相关</span>
+ </a>
+ <!-- 章节36 -->
+ <a class="compact-chapter-item" href="36.html">
+ <span class="compact-chapter-no">36</span>
+ <span class="compact-chapter-title">相关检验</span>
+ </a>
+ <!-- 章节37 -->
+ <a class="compact-chapter-item" href="37.html">
+ <span class="compact-chapter-no">37</span>
+ <span class="compact-chapter-title">简单线性回归</span>
+ </a>
+ <!-- 章节38 -->
+ <a class="compact-chapter-item" href="38.html">
+ <span class="compact-chapter-no">38</span>
+ <span class="compact-chapter-title">回归诊断</span>
+ </a>
+ <!-- 章节39 -->
+ <a class="compact-chapter-item" href="39.html">
+ <span class="compact-chapter-no">39</span>
+ <span class="compact-chapter-title">多项式回归</span>
+ </a>
+ <!-- 章节40 -->
+ <a class="compact-chapter-item" href="40.html">
+ <span class="compact-chapter-no">40</span>
+ <span class="compact-chapter-title">多元线性回归</span>
+ </a>
+ <!-- 章节41 -->
+ <a class="compact-chapter-item" href="41.html">
+ <span class="compact-chapter-no">41</span>
+ <span class="compact-chapter-title">模型比较</span>
+ </a>
+ <!-- 章节42 -->
+ <a class="compact-chapter-item" href="42.html">
+ <span class="compact-chapter-no">42</span>
+ <span class="compact-chapter-title">逻辑回归</span>
+ </a>
+ <!-- 章节43 -->
+ <a class="compact-chapter-item" href="43.html">
+ <span class="compact-chapter-no">43</span>
+ <span class="compact-chapter-title">OR值计算</span>
+ </a>
+ <!-- 章节44 -->
+ <a class="compact-chapter-item" href="44.html">
+ <span class="compact-chapter-no">44</span>
+ <span class="compact-chapter-title">ROC曲线</span>
+ </a>
+ <!-- 章节45 -->
+ <a class="compact-chapter-item" href="45.html">
+ <span class="compact-chapter-no">45</span>
+ <span class="compact-chapter-title">生存分析数据准备</span>
+ </a>
+ <!-- 章节46 -->
+ <a class="compact-chapter-item" href="46.html">
+ <span class="compact-chapter-no">46</span>
+ <span class="compact-chapter-title">Kaplan-Meier曲线</span>
+ </a>
+ <!-- 章节47 -->
+ <a class="compact-chapter-item" href="47.html">
+ <span class="compact-chapter-no">47</span>
+ <span class="compact-chapter-title">log-rank检验</span>
+ </a>
+ <!-- 章节48 -->
+ <a class="compact-chapter-item" href="48.html">
+ <span class="compact-chapter-no">48</span>
+ <span class="compact-chapter-title">Cox比例风险模型</span>
+ </a>
+ <!-- 章节49 -->
+ <a class="compact-chapter-item" href="49.html">
+ <span class="compact-chapter-no">49</span>
+ <span class="compact-chapter-title">森林图</span>
+ </a>
+ <!-- 章节50 -->
+ <a class="compact-chapter-item" href="50.html">
+ <span class="compact-chapter-no">50</span>
+ <span class="compact-chapter-title">诊断试验灵敏度</span>
+ </a>
+ <!-- 章节51 -->
+ <a class="compact-chapter-item" href="51.html">
+ <span class="compact-chapter-no">51</span>
+ <span class="compact-chapter-title">诊断试验特异度</span>
+ </a>
+ <!-- 章节52 -->
+ <a class="compact-chapter-item" href="52.html">
+ <span class="compact-chapter-no">52</span>
+ <span class="compact-chapter-title">阳性预测值</span>
+ </a>
+ <!-- 章节53 -->
+ <a class="compact-chapter-item" href="53.html">
+ <span class="compact-chapter-no">53</span>
+ <span class="compact-chapter-title">阴性预测值</span>
+ </a>
+ <!-- 章节54 -->
+ <a class="compact-chapter-item" href="54.html">
+ <span class="compact-chapter-no">54</span>
+ <span class="compact-chapter-title">Kappa一致性检验</span>
+ </a>
+ <!-- 章节55 -->
+ <a class="compact-chapter-item" href="55.html">
+ <span class="compact-chapter-no">55</span>
+ <span class="compact-chapter-title">组内相关系数ICC</span>
+ </a>
+ <!-- 章节56 -->
+ <a class="compact-chapter-item" href="56.html">
+ <span class="compact-chapter-no">56</span>
+ <span class="compact-chapter-title">标准化均数差</span>
+ </a>
+ <!-- 章节57 -->
+ <a class="compact-chapter-item" href="57.html">
+ <span class="compact-chapter-no">57</span>
+ <span class="compact-chapter-title">样本量计算</span>
+ </a>
+ <!-- 章节58 -->
+ <a class="compact-chapter-item" href="58.html">
+ <span class="compact-chapter-no">58</span>
+ <span class="compact-chapter-title">随机分组</span>
+ </a>
+ <!-- 章节59 -->
+ <a class="compact-chapter-item" href="59.html">
+ <span class="compact-chapter-no">59</span>
+ <span class="compact-chapter-title">分层随机分组</span>
+ </a>
+ <!-- 章节60 -->
+ <a class="compact-chapter-item" href="60.html">
+ <span class="compact-chapter-no">60</span>
+ <span class="compact-chapter-title">数据重塑</span>
+ </a>
+ <!-- 章节61 -->
+ <a class="compact-chapter-item" href="61.html">
+ <span class="compact-chapter-no">61</span>
+ <span class="compact-chapter-title">合并数据</span>
+ </a>
+ <!-- 章节62 -->
+ <a class="compact-chapter-item" href="62.html">
+ <span class="compact-chapter-no">62</span>
+ <span class="compact-chapter-title">数据去重</span>
+ </a>
+ <!-- 章节63 -->
+ <a class="compact-chapter-item" href="63.html">
+ <span class="compact-chapter-no">63</span>
+ <span class="compact-chapter-title">数据标准化</span>
+ </a>
+ <!-- 章节64 -->
+ <a class="compact-chapter-item" href="64.html">
+ <span class="compact-chapter-no">64</span>
+ <span class="compact-chapter-title">变量转换</span>
+ </a>
+ <!-- 章节65 -->
+ <a class="compact-chapter-item" href="65.html">
+ <span class="compact-chapter-no">65</span>
+ <span class="compact-chapter-title">分组汇总</span>
+ </a>
+ <!-- 章节66 -->
+ <a class="compact-chapter-item" href="66.html">
+ <span class="compact-chapter-no">66</span>
+ <span class="compact-chapter-title">管道操作</span>
+ </a>
+ <!-- 章节67 -->
+ <a class="compact-chapter-item" href="67.html">
+ <span class="compact-chapter-no">67</span>
+ <span class="compact-chapter-title">条件分类</span>
+ </a>
+ <!-- 章节68 -->
+ <a class="compact-chapter-item" href="68.html">
+ <span class="compact-chapter-no">68</span>
+ <span class="compact-chapter-title">日期处理</span>
+ </a>
+ <!-- 章节69 -->
+ <a class="compact-chapter-item" href="69.html">
+ <span class="compact-chapter-no">69</span>
+ <span class="compact-chapter-title">年龄计算</span>
+ </a>
+ <!-- 章节70 -->
+ <a class="compact-chapter-item" href="70.html">
+ <span class="compact-chapter-no">70</span>
+ <span class="compact-chapter-title">哑变量生成</span>
+ </a>
+ <!-- 章节71 -->
+ <a class="compact-chapter-item" href="71.html">
+ <span class="compact-chapter-no">71</span>
+ <span class="compact-chapter-title">自定义函数</span>
+ </a>
+ <!-- 章节72 -->
+ <a class="compact-chapter-item" href="72.html">
+ <span class="compact-chapter-no">72</span>
+ <span class="compact-chapter-title">循环计算</span>
+ </a>
+ <!-- 章节73 -->
+ <a class="compact-chapter-item" href="73.html">
+ <span class="compact-chapter-no">73</span>
+ <span class="compact-chapter-title">条件循环</span>
+ </a>
+ <!-- 章节74 -->
+ <a class="compact-chapter-item" href="74.html">
+ <span class="compact-chapter-no">74</span>
+ <span class="compact-chapter-title">apply家族</span>
+ </a>
+ <!-- 章节75 -->
+ <a class="compact-chapter-item" href="75.html">
+ <span class="compact-chapter-no">75</span>
+ <span class="compact-chapter-title">sapply简化</span>
+ </a>
+ <!-- 章节76 -->
+ <a class="compact-chapter-item" href="76.html">
+ <span class="compact-chapter-no">76</span>
+ <span class="compact-chapter-title">tapply分组应用</span>
+ </a>
+ <!-- 章节77 -->
+ <a class="compact-chapter-item" href="77.html">
+ <span class="compact-chapter-no">77</span>
+ <span class="compact-chapter-title">ggplot2散点图</span>
+ </a>
+ <!-- 章节78 -->
+ <a class="compact-chapter-item" href="78.html">
+ <span class="compact-chapter-no">78</span>
+ <span class="compact-chapter-title">ggplot2箱线图</span>
+ </a>
+ <!-- 章节79 -->
+ <a class="compact-chapter-item" href="79.html">
+ <span class="compact-chapter-no">79</span>
+ <span class="compact-chapter-title">ggplot2直方图</span>
+ </a>
+ <!-- 章节80 -->
+ <a class="compact-chapter-item" href="80.html">
+ <span class="compact-chapter-no">80</span>
+ <span class="compact-chapter-title">ggplot2生存曲线</span>
+ </a>
+ <!-- 章节81 -->
+ <a class="compact-chapter-item" href="81.html">
+ <span class="compact-chapter-no">81</span>
+ <span class="compact-chapter-title">主题定制</span>
+ </a>
+ <!-- 章节82 -->
+ <a class="compact-chapter-item" href="82.html">
+ <span class="compact-chapter-no">82</span>
+ <span class="compact-chapter-title">分面图</span>
+ </a>
+ <!-- 章节83 -->
+ <a class="compact-chapter-item" href="83.html">
+ <span class="compact-chapter-no">83</span>
+ <span class="compact-chapter-title">颜色调整</span>
+ </a>
+ <!-- 章节84 -->
+ <a class="compact-chapter-item" href="84.html">
+ <span class="compact-chapter-no">84</span>
+ <span class="compact-chapter-title">坐标轴变换</span>
+ </a>
+ <!-- 章节85 -->
+ <a class="compact-chapter-item" href="85.html">
+ <span class="compact-chapter-no">85</span>
+ <span class="compact-chapter-title">热图</span>
+ </a>
+ <!-- 章节86 -->
+ <a class="compact-chapter-item" href="86.html">
+ <span class="compact-chapter-no">86</span>
+ <span class="compact-chapter-title">相关矩阵图</span>
+ </a>
+ <!-- 章节87 -->
+ <a class="compact-chapter-item" href="87.html">
+ <span class="compact-chapter-no">87</span>
+ <span class="compact-chapter-title">多重检验校正</span>
+ </a>
+ <!-- 章节88 -->
+ <a class="compact-chapter-item" href="88.html">
+ <span class="compact-chapter-no">88</span>
+ <span class="compact-chapter-title">置信区间计算</span>
+ </a>
+ <!-- 章节89 -->
+ <a class="compact-chapter-item" href="89.html">
+ <span class="compact-chapter-no">89</span>
+ <span class="compact-chapter-title">Z检验</span>
+ </a>
+ <!-- 章节90 -->
+ <a class="compact-chapter-item" href="90.html">
+ <span class="compact-chapter-no">90</span>
+ <span class="compact-chapter-title">Poisson回归</span>
+ </a>
+ <!-- 章节91 -->
+ <a class="compact-chapter-item" href="91.html">
+ <span class="compact-chapter-no">91</span>
+ <span class="compact-chapter-title">负二项回归</span>
+ </a>
+ <!-- 章节92 -->
+ <a class="compact-chapter-item" href="92.html">
+ <span class="compact-chapter-no">92</span>
+ <span class="compact-chapter-title">协方差分析</span>
+ </a>
+ <!-- 章节93 -->
+ <a class="compact-chapter-item" href="93.html">
+ <span class="compact-chapter-no">93</span>
+ <span class="compact-chapter-title">重复测量方差分析</span>
+ </a>
+ <!-- 章节94 -->
+ <a class="compact-chapter-item" href="94.html">
+ <span class="compact-chapter-no">94</span>
+ <span class="compact-chapter-title">混合效应模型</span>
+ </a>
+ <!-- 章节95 -->
+ <a class="compact-chapter-item" href="95.html">
+ <span class="compact-chapter-no">95</span>
+ <span class="compact-chapter-title">主成分分析</span>
+ </a>
+ <!-- 章节96 -->
+ <a class="compact-chapter-item" href="96.html">
+ <span class="compact-chapter-no">96</span>
+ <span class="compact-chapter-title">因子分析</span>
+ </a>
+ <!-- 章节97 -->
+ <a class="compact-chapter-item" href="97.html">
+ <span class="compact-chapter-no">97</span>
+ <span class="compact-chapter-title">聚类分析</span>
+ </a>
+ <!-- 章节98 -->
+ <a class="compact-chapter-item" href="98.html">
+ <span class="compact-chapter-no">98</span>
+ <span class="compact-chapter-title">层次聚类</span>
+ </a>
+ <!-- 章节99 -->
+ <a class="compact-chapter-item" href="99.html">
+ <span class="compact-chapter-no">99</span>
+ <span class="compact-chapter-title">决策树</span>
+ </a>
+ <!-- 章节100 -->
+ <a class="compact-chapter-item" href="100.html">
+ <span class="compact-chapter-no">100</span>
+ <span class="compact-chapter-title">随机森林</span>
+ </a>
+ </div>
+</div>
+<div class="footer">
+ <a href="http://124.221.106.7/wendang/" target="_blank">
+ 点击此处查看：50个+行业、500+细分领域、10w+门课程资料-大目录汇总
+ </a>
+ <div class="footer-note">，</div>
+</div>
+</body>
+</html>

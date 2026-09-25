@@ -1,0 +1,58 @@
+案例问题/题目：使用factanal()对ability.cov数据集进行探索性因子分析，提取2个因子并解释结构。
+
+环境依赖：R ≥ 4.0，仅标准库（stats包），无需安装第三方包。
+
+完整代码：
+# 加载内置数据集
+data(ability.cov)
+cov_matrix <- ability.cov$cov
+
+# 探索性因子分析 (2个因子, 最大似然法)
+fa_result <- factanal(covmat = cov_matrix, factors = 2, rotation = "varimax")
+
+# 输出结果
+print(fa_result, digits = 3)
+
+# 可视化载荷
+loadings <- fa_result$loadings[,1:2]
+plot(loadings, xlim = c(-0.2, 1), ylim = c(-0.2, 1), 
+     pch = 18, col = "blue", cex = 1.5,
+     xlab = "Factor 1", ylab = "Factor 2", main = "载荷散点图")
+text(loadings, labels = rownames(loadings), pos = 3, cex = 0.8)
+abline(h = 0, v = 0, lty = 2, col = "gray")
+
+# 检查独特方差
+print(fa_result$uniqueness)
+
+运行命令：
+Rscript 因子分析_example.R
+
+预期运行结果：
+Factored by ML method.
+Test of the hypothesis that 2 factors are sufficient.
+The chi square statistic is 5.67 on 4 degrees of freedom.
+p-value is 0.167
+
+Loadings:
+          Factor1 Factor2
+general   0.464   0.312  
+picture   0.287   0.609  
+blocks    0.118   0.633  
+maze      0.190   0.527  
+reading   0.644   0.172  
+vocab     0.739   0.240  
+
+               Factor1 Factor2
+SS loadings      1.194   1.087
+Proportion Var   0.199   0.181
+
+Test of the hypothesis that 2 factors are sufficient.
+
+测试建议：尝试factors=1或3，观察p值和方差解释比例变化；改用rotation="promax"（斜交）对比结构。
+
+常见问题/注意事项：
+1. factanal()要求输入协方差矩阵或原始数据，若输入原始数据需设置covmat=NULL。
+2. 协方差矩阵必须正定，否则报错。
+3. 载荷建议展示到小数点后3位，便于阅读。
+4. 因子数量选择需结合专业及统计检验，勿机械使用特征值>1。
+5. 对于不满足正态性的变量，可采用主成分法（princomp）代替。

@@ -1,0 +1,53 @@
+案例问题/题目：使用K均值聚类将模拟的25例患者按三项生化指标分为3个代谢亚组。
+
+环境依赖：
+- 语言：R（版本≥4.0）
+- 依赖包：MASS（仅用于模拟多元正态数据；若模拟数据已存在则仅需base R）
+- 运行命令：Rscript script.R
+
+完整代码：
+set.seed(123)
+n <- 25
+# 模拟三组不同代谢特征的数据（血糖GLU，总胆固醇TC，甘油三酯TG）
+library(MASS)
+group1 <- mvrnorm(8, c(4.5, 4.0, 1.0), diag(0.3, 3))
+group2 <- mvrnorm(9, c(7.0, 5.0, 1.5), diag(0.3, 3))
+group3 <- mvrnorm(8, c(5.5, 6.0, 2.5), diag(0.3, 3))
+dat <- as.data.frame(rbind(group1, group2, group3))
+names(dat) <- c("GLU", "TC", "TG")
+
+# 数据标准化（关键步骤）
+dat_std <- scale(dat)
+
+# K均值聚类：3类，25次随机起始
+km <- kmeans(dat_std, centers = 3, nstart = 25)
+
+# 在原数据框添加聚类标签
+dat$cluster <- km$cluster
+
+# 输出结果
+cat("聚类中心（标准化后）：\n")
+print(km$centers)
+cat("\n各簇样本数：\n")
+print(table(dat$cluster))
+cat("\n各簇原始数据均值：\n")
+print(aggregate(dat[, 1:3], by = list(cluster = dat$cluster), mean))
+
+运行命令：
+Rscript kmeans_example.R
+
+预期运行结果：
+- 输出3×3的聚类中心矩阵，三行中心值明显不同。
+- 各簇样本数约为8、9、8。
+- 各簇原始均值显示：簇1 GLU~4.5 TC~4.0 TG~1.0；簇2 GLU~7.0 TC~5.0 TG~1.5；簇3 GLU~5.5 TC~6.0 TG~2.5，与模拟设计吻合。
+
+测试建议：
+1. 修改centers参数测试不同k值（如2或4），观察结果变化。
+2. 删除scale()步骤对比结果，体会标准化重要性。
+3. 使用真实医学数据时建议先处理缺失值并考虑异常值影响。
+
+常见问题或注意事项：
+- 若未安装MASS包，运行install.packages("MASS")。
+- kmeans结果受随机种子影响，务必设置set.seed()。
+- 标准化的均值和标准差应保存，便于将新患者映射到聚类空间。
+- 实际科研中可结合NbClust包自动选择最佳k。

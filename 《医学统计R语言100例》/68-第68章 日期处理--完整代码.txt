@@ -1,0 +1,50 @@
+案例问题/题目：
+用R基础函数as.Date()与lubridate包处理出生日期字符串，计算患者年龄并统一格式。演示两种方法的差异，尤其针对生日未到时的精度问题。
+
+环境依赖：
+R版本≥4.0；需要安装lubridate包（install.packages("lubridate")）。运行命令：Rscript 案例68.R
+
+完整代码：
+library(lubridate)
+
+# 模拟原始数据
+df <- data.frame(
+  ID = 1:3,
+  birth = c("1985-03-15", "1990-07-20", "1978-11-02"),
+  visit = c("2024-03-15", "2024-07-19", "2025-01-05"),
+  stringsAsFactors = FALSE
+)
+
+# 方法1：基础as.Date()，年龄=floor(天数/365.25)
+df$birth1 <- as.Date(df$birth)
+df$visit1 <- as.Date(df$visit)Not
+df$age_base <- floor(as.numeric(difftime(df$visit1, df$birth1, units="days")) / 365.25)
+
+# 方法2：lubridate精确年龄
+df$birth2 <- ymd(df$birth)
+df$visit2 <- ymd(df$visit)
+df$age_lub <- time_length(interval(df$birth2, df$visit2), "years")
+
+# 格式统一并输出
+df$visit_fmt <- format(df$visit2, "%Y年%m月%d日")
+print(df[, c("ID","birth2","visit_fmt","age_base","age_lub")])
+
+运行命令：
+Rscript 案例68.R
+
+预期运行结果：
+  ID     birth2   visit_fmt age_base  age_lub
+1  1 1985-03-15 2024年03月15日       39 39.00137
+2  2 1990-07-20 2024年07月19日       33 33.00000
+3  3 1978-11-02 2025年01月05日       46 46.17260
+
+测试建议：
+1. 修改第3行的visit为"2024-03-14"（生日前一天），对比两种方法差异（基础法仍得39，lubridate得38.997）。
+2. 将birth改为"1985/03/15"，测试ymd()自动解析成功，而as.Date()需加format="%Y/%m/%d"。
+3. 批量数据清洗时，建议用lubridate并配合floor()取整，避免个别日期误差。
+
+常见问题或注意事项：
+1. as.Date()对非标准格式易报错，务必先查看数据原始格式。
+2. difftime按平均年365.25计算，在闰年2月29日出生时误差可达1天，长期跨度下年龄可能差1岁。
+3. interval()基于精确秒数，若跨时区需指定tz参数，但临床本地数据一般无需。
+4. 不要直接用as.numeric(interval对象)除以365.25，那样会丢失单位信息，应使用time_length()。

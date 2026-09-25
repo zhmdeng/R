@@ -1,0 +1,47 @@
+案例问题/题目：
+某临床试验比较两种降压药A和B的疗效，对12名患者采用配对设计（同一患者先后接受两种药），记录服药后收缩压下降值（mmHg）。数据如下：
+A药：12,15,18,10,8,14,16,11,9,13,17,15
+B药：10,11,15,9,7,12,14,10,8,11,13,12
+问：两药效果是否有统计学差异？数据不满足正态性假设，使用Wilcoxon符号秩检验（配对非参数检验）。
+
+环境依赖：
+R语言（>=3.5.0），仅标准库（stats包），无需安装额外包。运行命令：Rscript script.R 或直接在R交互环境执行。
+
+完整代码：
+# 数据输入
+A <- c(12,15,18,10,8,14,16,11,9,13,17,15)
+B <- c(10,11,15,9,7,12,14,10,8,11,13,12)
+
+# 检验差值正态性（仅供参考）
+diff <- A - B
+shapiro.test(diff)
+
+# Wilcoxon符号秩检验（配对）
+res <- wilcox.test(A, B, paired = TRUE)
+print(res)
+
+# 提取关键结果
+cat("V值（符号秩和统计量）:", res$statistic, "\n")
+cat("p值:", res$p.value, "\n")
+
+运行命令：
+Rscript case33_wilcox.R
+
+预期运行结果：
+	Wilcoxon signed rank test with continuity correction
+
+data:  A and B
+V = 55, p-value = 0.06934
+alternative hypothesis: true location shift is not equal to 0
+
+测试建议：
+1. 运行前先执行shapiro.test(A-B)，若p<0.05说明差值非正态，适合符号秩检验；
+2. 尝试将A、B数据顺序互换，V统计量会变化但p值对称；
+3. 小样本时可设置exact=TRUE获取精确p值；
+4. 若数据存在缺失值，使用na.omit或complete.cases清理后再检验。
+
+常见问题或注意事项：
+1. 配对检验必须paired=TRUE，否则会误用两独立样本检验；
+2. 该方法要求差值分布对称，若严重偏斜可考虑符号检验或改用置换检验；
+3. 注意p值解释：p>0.05表示证据不足以支持总体差值中位数非零；
+4. 本测试为双侧检验，若需单侧可使用alternative="greater"或"less"。

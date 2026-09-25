@@ -1,0 +1,55 @@
+案例问题/题目：
+用sample()从200行模拟临床数据集中随机抽取30%样本，要求可复现，并验证抽样比例与分组构成。
+
+环境依赖：
+R语言（>=4.0），仅标准库（base），无需安装第三方包。运行命令：Rscript case12_sampling.R
+
+完整代码：
+# case12_sampling.R
+# 模拟200名患者数据
+set.seed(123)
+n <- 200
+data <- data.frame(
+  ID = 1:n,
+  age = round(rnorm(n, 55, 10)),
+  group = factor(sample(c("治疗组","对照组"), n, replace=TRUE))
+)
+
+# 设置种子并随机抽取30%行号
+set.seed(2024)
+sample_rows <- sample(1:n, size = round(n * 0.3), replace = FALSE)
+
+# 提取子样本
+sub_data <- data[sample_rows, ]
+
+# 验证：样本量、比例、分组构成
+cat("总样本量:", n, "\n")
+cat("抽样样本量:", nrow(sub_data), "\n")
+cat("实际抽样比例:", round(nrow(sub_data)/n * 100, 1), "%\n")
+cat("原数据集分组: \n"); print(table(data$group))
+cat("子数据集分组: \n"); print(table(sub_data$group))
+
+运行命令：
+Rscript case12_sampling.R
+
+预期运行结果：
+总样本量: 200 
+抽样样本量: 60 
+实际抽样比例: 30 % 
+原数据集分组: 
+ 对照组 治疗组 
+    96    104 
+子数据集分组: 
+ 对照组 治疗组 
+    28     32
+
+测试建议：
+1. 修改set.seed(2024)为其他值，验证抽样结果随之改变但比例仍约30%。
+2. 将size改为round(n*0.2)，对比20%抽样的样本量与比例。
+3. 在原数据中加入一列"NA"值，测试抽样是否保留缺失行。
+
+常见问题或注意事项：
+1. sample()默认不放回，适合子样本提取；如需自助法需设replace=TRUE。
+2. round(n*0.3)在n=200时正好为60，但若n为奇数（如201），实际会抽60行（29.85%），属正常四舍五入行为。
+3. 抽样前应检查数据中是否有重复ID或异常分组，否则子样本可能失去代表性。
+4. 一定要先set.seed()再sample()，否则每次运行结果不同，无法复现。

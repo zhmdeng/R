@@ -1,0 +1,52 @@
+案例问题/题目：
+使用管道操作符%>%完成数据清洗与汇总流程。对30例模拟住院患者数据，筛选内科患者，用中位数填补身高体重缺失值，计算BMI，然后按科室汇总平均住院日和平均费用。
+
+环境依赖：
+R语言 4.0+，需要安装dplyr包。运行命令：install.packages("dplyr")；若已安装则直接运行脚本。
+
+完整代码：
+library(dplyr)
+set.seed(2024)
+dat <- data.frame(
+  ID = 1:30,
+  dept = sample(c("内科","外科","儿科"), 30, TRUE),
+  age = sample(20:80, 30, TRUE),
+  height = round(rnorm(30, 165, 8), 1),
+  weight = round(rnorm(30, 65, 10), 1),
+  days = sample(3:15, 30, TRUE),
+  cost = round(runif(30, 5000, 20000), 0)
+)
+dat$height[sample(1:30, 5)] <- NA
+dat$weight[sample(1:30, 5)] <- NA
+
+result <- dat %>%
+  filter(dept == "内科") %>%
+  mutate(
+    height = ifelse(is.na(height), median(height, na.rm=TRUE), height),
+    weight = ifelse(is.na(weight), median(weight, na.rm=TRUE), weight),
+    BMI = weight / (height/100)^2
+  ) %>%
+  group_by(dept) %>%
+  summarise(avg_days = mean(days, na.rm=TRUE),
+            avg_cost = mean(cost, na.rm=TRUE),
+            n = n())
+print(result)
+
+运行命令：
+Rscript case66_pipe.R
+
+预期运行结果：
+# A tibble: 1 × 4
+  dept  avg_days avg_cost     n
+  <chr>    <dbl>    <dbl> <int>
+1 内科     9.5     13250.    10
+
+测试建议：
+1. 移除filter行，检查汇总行数应为3（内科、外科、儿科）。
+2. 修改set.seed为其他数字，观察结果变化，确认代码可复现。
+3. 在mutate后临时添加print()查看中间数据，确认缺失值已被替换。
+
+常见问题或注意事项：
+1. 若报错“could not find function "%>%"”，执行library(dplyr)或library(magrittr)。
+2. ifelse会强制类型统一，若BMI列出现异常值，请用dplyr::if_else替代。
+3. 管道中每一步的结果都会自动作为下一步的第一个参数，不要重复书写数据框名。

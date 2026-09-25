@@ -1,0 +1,46 @@
+案例问题/题目：编写一个计算BMI的R函数，输入体重（kg）和身高（m），返回BMI值及健康分类（中国标准）。
+
+环境依赖：R 4.0+；仅标准库，无第三方依赖。
+
+完整代码：
+# 定义计算BMI的函数
+calc_bmi <- function(weight_kg, height_m) {
+  if (height_m <= 0 || weight_kg <= 0) {
+    stop("体重和身高必须为正数")
+  }
+  bmi <- weight_kg / (height_m^2)
+  
+  # 中国成人BMI分类标准
+  category <- if (bmi < 18.5) "偏瘦"
+              else if (bmi < 24) "正常"
+              else if (bmi < 28) "超重"
+              else "肥胖"
+  
+  result <- list(
+    BMI = round(bmi, 1),
+    Category = category
+  )
+  return(result)
+}
+
+# 调用示例
+person1 <- calc_bmi(65, 1.75)
+print(paste("BMI:", person1$BMI, "-", person1$Category))
+
+person2 <- calc_bmi(80, 1.70)
+print(paste("BMI:", person2$BMI, "-", person2$Category))
+
+运行命令：Rscript bmi_function.R
+
+预期运行结果：
+[1] "BMI: 21.2 - 正常"
+[1] "BMI: 27.7 - 超重"
+
+测试建议：
+1. 测试边界值：体重54kg/1.70m（BMI=18.7），体重69.4kg/1.70m（BMI=24.0），验证分类边界。
+2. 输入身高0或负值，确认报错信息。
+
+常见问题/注意事项：
+- R中幂运算使用^，不是**。
+- stop()函数会中断执行并抛出错误，适合参数校验。
+- BMI分类标准因国家和地区而异，本案例使用中国成人标准。

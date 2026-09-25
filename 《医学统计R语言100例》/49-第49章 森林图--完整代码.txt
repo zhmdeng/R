@@ -1,0 +1,59 @@
+案例问题/题目：用forestplot包可视化Cox回归结果（森林图）
+
+环境依赖：
+- R语言（版本≥4.0）
+- 依赖包：survival（内置）、forestplot（需安装）
+- 运行命令：Rscript 本文件.R 或 Rstudio中逐行执行
+
+完整代码：
+install.packages("forestplot")
+library(survival)
+library(forestplot)
+
+data(lung)
+dat <- na.omit(lung[, c("time", "status", "age", "sex", "ph.ecog")])
+dat$status <- ifelse(dat$status == 2, 1, 0)
+
+cox <- coxph(Surv(time, status) ~ age + sex + ph.ecog, data = dat)
+sum_cox <- summary(cox)
+
+hr <- exp(coef(cox))
+ci <- exp(confint(cox))
+pval <- sum_cox$coefficients[, "Pr(>|z|)"]
+
+res <- data.frame(
+  var = c("年龄", "性别(男vs女)", "ECOG评分"),
+  HR = round(hr, 2),
+  low = round(ci[, 1], 2),
+  high = round(ci[, 2], 2),
+  P = round(pval, 3)
+)
+
+forestplot(
+  labeltext = cbind(res$var, paste0(res$HR, " (", res$low, "-", res$high, ")")),
+  mean = log(hr),
+  lower = log(ci[, 1]),
+  upper = log(ci[, 2]),
+  xlab = "log(HR)",
+  zero = 0,
+  boxsize = 0.25,
+  col = fpColors(box = "darkblue", lines = "red", zero = "grey"),
+  txt_gp = fpTxtGp(cex = 1.2),
+  graph.pos = 2
+)
+
+运行命令：
+Rscript forest_plot_case.R
+
+预期运行结果：
+生成一幅森林图，横轴为log(HR)，纵轴为三个变量；每个变量显示HR点估计和95%CI横线，参考线在0处（HR=1）。性别变量的CI横线完全在参考线左侧，P<0.05，提示性别显著影响预后。
+
+测试建议：
+1. 将数据集更换为卵巢癌或乳腺癌数据，检查图形是否自动适配。
+2. 增加协变量（如ph.karno、wt.loss）后运行，观察图形行数变化。
+3. 修改boxsize=c(0.2,0.3)，体会图形标尺变化。
+
+常见问题：
+1. 若install.packages无法安装，需设置镜像或手动安装。
+2. 若图形中文标签乱码，将var列改为英文（如Age）即可解决。
+3. log(ci)中若CI下限为0，会导致log结果为-Inf，需要处理缺失值或改用HR原始值绘图。

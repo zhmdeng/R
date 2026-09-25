@@ -1,0 +1,51 @@
+案例问题/题目：
+使用R语言统计数据集中缺失值的总数和每列缺失个数及比例。
+
+环境依赖：
+R 4.0+，仅标准库（base），无第三方包依赖。
+运行命令：Rscript case7_missing.R
+
+完整代码：
+# 构造模拟数据集
+set.seed(42)
+n <- 50
+df <- data.frame(
+  性别 = sample(c("男","女"), n, replace = TRUE),
+  年龄 = round(rnorm(n, 45, 10)),
+  收缩压 = round(rnorm(n, 120, 15)),
+  血糖 = round(rnorm(n, 5.5, 1.2), 1)
+)
+
+# 人为制造缺失值
+df$年龄[sample(1:n, 5)] <- NA
+df$收缩压[sample(1:n, 8)] <- NA
+df$血糖[sample(1:n, 3)] <- NA
+
+# 缺失值统计核心代码
+总缺失数 <- sum(is.na(df))
+各列缺失数 <- colSums(is.na(df))
+各列缺失比例 <- round(colMeans(is.na(df)) * 100, 1)
+
+cat("缺失值总数：", 总缺失数, "\n")
+print(各列缺失数)
+print(各列缺失比例)
+
+运行命令：
+Rscript case7_missing.R
+
+预期运行结果：
+缺失值总数： 16
+性别 年龄 收缩压 血糖
+    0    5    8    3
+性别 年龄 收缩压 血糖
+  0.0 10.0 16.0  6.0
+
+测试建议：
+1. 修改sample中的数字（如5改为10），验证缺失数是否相应变化。
+2. 将sum(is.na(df))改为sum(!is.na(df))，得到非缺失总数=50*4-16=184。
+3. 检查性别列是否为0缺失，若需制造性别缺失可增加一行代码。
+
+常见问题或注意事项：
+1. is.na()对NaN同样返回TRUE，但对空字符串""返回FALSE，务必先将""转成NA。
+2. 若数据框含factor类型，先转为character再操作，避免隐式转换错误。
+3. colSums(is.na(df))适用于小数据框；大数据量建议使用sapply(df, function(x) sum(is.na(x)))。

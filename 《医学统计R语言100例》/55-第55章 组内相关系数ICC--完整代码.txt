@@ -1,0 +1,40 @@
+案例问题/题目：用irr包计算重复测量的组内相关系数（ICC），评价12名受试者两次血压测量的一致性。
+
+环境依赖：R 4.0+，需安装irr包（install.packages("irr")）
+
+完整代码：
+# 安装并加载包
+# install.packages("irr")
+library(irr)
+
+# 构造数据：12个受试者，两次测量
+data <- data.frame(
+  rater1 = c(120, 128, 135, 142, 138, 126, 130, 145, 122, 136, 129, 141),
+  rater2 = c(118, 130, 133, 140, 136, 125, 132, 143, 120, 135, 127, 139)
+)
+
+# 计算ICC（模型="twoway"，类型="agreement"，单位="single"）
+result <- icc(data, model = "twoway", type = "agreement", unit = "single")
+print(result)
+
+# 提取关键数值
+cat("ICC =", round(result$value, 3), "\n")
+cat("95%置信区间 = [", round(result$lbound, 3), ",", round(result$ubound, 3), "]\n")
+
+运行命令：
+Rscript icc_demo.R
+
+预期运行结果：
+ICC = 0.972
+95%置信区间 = [ 0.914 , 0.991 ]
+p-value = 1.19e-07  （具体p值可能略有不同）
+
+测试建议：
+1. 尝试将某一位受试者的第二次测量值改为极端值（如200），观察ICC下降幅度。
+2. 尝试将type参数改为"consistency"，比较结果差异，理解一致性vs绝对一致性的区别。
+
+常见问题/注意事项：
+- 数据框的行代表受试者，列代表重复测量的次数，不要弄反。
+- 若数据包含缺失值，需先完整删除（na.omit）或用na.action参数处理。
+- icc()函数要求每组测量（列）有相同样本量，本例为平衡设计。
+- 报告时务必注明模型类型、单位（single/average），否则结果不可比较。

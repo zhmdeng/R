@@ -1,0 +1,55 @@
+案例问题/题目：两种降压药（A、B）的舒张压降幅（mmHg）数据如下，用var.test()检验两组方差是否相等（α=0.05）。
+A组：12, 15, 14, 18, 17, 11, 16, 13, 20, 15
+B组：10, 9, 12, 8, 11, 7, 13, 10, 9, 12
+
+环境依赖：
+- R语言 4.0+（仅标准库，无第三方依赖）
+- 运行命令：Rscript ch24_vartest.R
+
+完整代码：
+# 第24章：方差齐性检验
+# 用var.test()检验两组方差是否相等
+
+# 录入两组数据
+A <- c(12, 15, 14, 18, 17, 11, 16, 13, 20, 15)
+B <- c(10, 9, 12, 8, 11, 7, 13, 10, 9, 12)
+
+# 双侧检验（默认）
+res <- var.test(A, B, alternative = "two.sided")
+print(res)
+
+# 单侧检验：备择假设为A的方差大于B
+res_one <- var.test(A, B, alternative = "greater")
+print(res_one)
+
+# 手动计算F统计量验证
+F_calc <- var(A) / var(B)
+p_two <- 2 * (1 - pf(F_calc, length(A)-1, length(B)-1))
+cat("手动F值:", F_calc, " 手动双侧p:", p_two, "\n")
+
+运行命令：
+Rscript ch24_vartest.R
+
+预期运行结果：
+	F test to compare two variances
+
+data:  A and B
+F = 1.9658, num df = 9, denom df = 9, p-value = 0.3007
+alternative hypothesis: true ratio of variances is not equal to 1
+95 percent confidence interval:
+ 0.5484621 7.0451197
+sample estimates:
+ratio of variances 
+          1.96578 
+
+（单侧检验p = 0.1504，手动计算与函数一致）
+
+测试建议：
+1. 构造方差异常数据：将B组所有值乘以3，再检验，p会显著变小。
+2. 尝试改变alternative="less"，观察p变化。
+3. 用shapiro.test()先检验正态性，确保F检验适用。
+
+常见问题或注意事项：
+- var.test()对正态性敏感，若数据非正态，考虑leveneTest（需car包）或bartlett.test（但后者更敏感）。
+- F检验结果为方差齐时，可使用经典t检验；若方差不齐，应使用Welch t检验（t.test默认）。
+- 样本量极小时（n<5），F检验功效很低，结论需谨慎。
